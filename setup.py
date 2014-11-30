@@ -25,7 +25,7 @@ class PyTest(RunCommand):
 
     def run(self):
         cli_options = ['-k', self.match] if self.match else []
-        covSrcPaths = ['--cov=' + os.path.join("src", p) for p in ['chroot']]
+        covSrcPaths = ['--cov=chroot']
         os.environ['EPYTHON'] = 'python{}.{}'.format(sys.version_info.major, sys.version_info.minor)
         errno = subprocess.call(['py.test'] + covSrcPaths + cli_options
                                 + ['--cov-report=html', '--cov-report=term'])
