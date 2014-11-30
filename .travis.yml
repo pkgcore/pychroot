@@ -8,7 +8,8 @@ install:
     - python setup.py install
 script:
     - pushd build/lib*
-    - py.test -v --cov chroot chroot
+    - py.test -v --cov chroot --cov-report=term
+    - ls -l
 after_success:
     # upload coverage data to coveralls.io
     - coveralls
