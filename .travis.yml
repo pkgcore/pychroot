@@ -4,11 +4,12 @@ python:
     - 3.3
     - 3.4
 install:
-    - pip install pytest-cov coveralls mock pylint
+    - pip install coverage coveralls mock pylint
     - python setup.py install
 script:
     - pushd build/lib*
-    - py.test -v --cov chroot --cov-report=term
+    - coverage run -m py.test -v
+    - coverage report
     - pwd && ls -l && ls -l ../../
 after_success:
     # upload coverage data to coveralls.io
