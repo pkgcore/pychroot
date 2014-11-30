@@ -2,10 +2,11 @@ from itertools import chain, cycle
 import os
 import sys
 
-if sys.hexversion >= 0x03030000:
-    from unittest.mock import Mock, patch
-else:
-    from mock import Mock, patch
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+from mock import patch
 from pytest import raises
 
 from chroot import Chroot

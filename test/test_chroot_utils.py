@@ -3,10 +3,11 @@ import logging
 import os
 import sys
 
-if sys.hexversion >= 0x03030000:
-    from unittest.mock import Mock, MagicMock, mock_open, patch
-else:
-    from mock import Mock, MagicMock, mock_open, patch
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+from mock import mock_open, patch
 from pytest import raises
 
 from chroot.utils import dictbool, getlogger, bind, MountError
