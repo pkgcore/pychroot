@@ -10,10 +10,6 @@ import sys
 if sys.hexversion >= 0x03030000:
     from socket import sethostname
 
-# make sure that we are in sys.path
-if abspath(normpath(join(__file__, '../..'))) not in sys.path:
-    sys.path.append(abspath(normpath(join(__file__, '../..'))))
-
 from chroot.unshare import unshare, CLONE_NEWUTS, CLONE_NEWNS, CLONE_NEWIPC  # pylint: disable=F0401
 # pylint likely will not see this stuff..
 
