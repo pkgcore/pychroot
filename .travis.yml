@@ -7,14 +7,12 @@ install:
     - pip install coverage coveralls mock pylint
     - python setup.py install
 script:
-    - pushd build/lib*
-    - coverage run -m py.test -v
+    - coverage run -m py.test -v test
     - coverage report
-    - pwd && ls -l && ls -l ../../
+    - ls -R
 after_success:
     # upload coverage data to coveralls.io
     - coveralls
-    - popd
 
     # run pylint checks
     - python setup.py lint
