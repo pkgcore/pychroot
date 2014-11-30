@@ -7,9 +7,8 @@ install:
     - pip install coverage coveralls mock pylint
     - python setup.py install
 script:
-    - coverage run -m py.test -v test
+    - coverage run --source chroot -m py.test
     - coverage report
-    - ls -R
 after_success:
     # upload coverage data to coveralls.io
     - coveralls
