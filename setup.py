@@ -57,7 +57,7 @@ setup(
     description='Python module to make working with chroots much easier',
     author='Tim Harder',
     author_email='radhermit@gmail.com',
-    license=open('LICENSE').read(),
+    license='BSD',
     packages=['chroot'],
     platforms='Posix',
     cmdclass={'test': PyTest, 'lint': PyLint},
