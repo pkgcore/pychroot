@@ -1,0 +1,14 @@
+language: python
+python:
+    - 2.7
+    - 3.3
+    - 3.4
+install: pip install pytest pytest-cov coveralls mock pylint
+script:
+    - python setup.py test
+after_success:
+    # upload coverage data to coveralls.io
+    - coveralls
+
+    # run pylint checks
+    - python setup.py list

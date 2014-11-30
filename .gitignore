@@ -1,0 +1,18 @@
+*.py[co]
+.coverage
+htmlcov
+.*.swp
+.*.un~
+
+# Packages
+*.egg
+*.egg-info
+MANIFEST
+dist
+build
+eggs
+sdist
+
+# Unit test / coverage reports
+.coverage
+.tox
