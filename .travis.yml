@@ -9,7 +9,7 @@ install:
 script:
     - pushd build/lib*
     - py.test -v --cov chroot --cov-report=term
-    - ls -l
+    - pwd && ls -l && ls -l ../../
 after_success:
     # upload coverage data to coveralls.io
     - coveralls
