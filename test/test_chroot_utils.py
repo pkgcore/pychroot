@@ -64,5 +64,3 @@ def test_bind():
         mopen.assert_called_once_with('/fake/dest', 'w')
 
         call.side_effect = [0, 1]
-        with raises(MountError):
-            bind('/', '/root', readonly=True)

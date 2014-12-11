@@ -33,7 +33,7 @@ def getlogger(log, name):
         else logging.getLogger(name))
 
 
-def bind(src, dest, create=False, log=None, recursive=False, readonly=False, **_kwargs):
+def bind(src, dest, create=False, log=None, recursive=False, **_kwargs):
     """Set up a bind mount.
 
     :param src: The source location to mount.
@@ -46,8 +46,6 @@ def bind(src, dest, create=False, log=None, recursive=False, readonly=False, **_
     :type log: logging.Logger
     :param recursive: Whether to use a recursive bind mount.
     :type recursive: bool
-    :param readonly: Whether to mount readonly.
-    :type readonly: bool
     """
     log = getlogger(log, __name__)
     if src not in ['proc', 'sysfs', 'tmpfs']:
@@ -82,9 +80,7 @@ def bind(src, dest, create=False, log=None, recursive=False, readonly=False, **_
     if status != 0:
         raise MountError('Mount failed')
 
-    # remount read-only if read-only was requested
-    if readonly:
-        if call(['mount', '--no-mtab', '--rbind' if recursive else '--bind', '--options', 'remount,ro', dest]) != 0:
+        if status != 0:
             raise MountError('Mount failed')
 
 
