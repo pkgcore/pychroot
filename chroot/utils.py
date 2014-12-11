@@ -3,6 +3,10 @@ import logging
 import os
 
 from subprocess import call
+try:
+    from libmount import Context
+except ImportError:
+    Context = None
 
 
 def dictbool(dct, key):
@@ -71,14 +75,22 @@ def bind(src, dest, create=False, log=None, recursive=False, **_kwargs):
         raise MountError('Attempt to bind mount on nonexistent path "{}"'.format(dest))
 
     if src in ['proc', 'sysfs', 'tmpfs']:
-        status = call(['mount', '--no-mtab', '-t', src, src, dest])
+        fstype = src
+        mount_options = []
+        log.debug("  mounting '{}' filesystem on '{}'".format(src, dest))
     else:
-        # do the bind mount by shelling out to mount
-        log.debug("  Bind mounting '{}' on '{}'".format(src, dest))
-        status = call(['mount', '--no-mtab', '--rbind' if recursive else '--bind', src, dest])
+        fstype = 'none'
+        mount_options = ['rbind' if recursive else 'bind']
+        log.debug("  bind mounting '{}' on '{}'".format(src, dest))
 
-    if status != 0:
-        raise MountError('Mount failed')
+    if Context is not None:
+        context = Context(source=src, target=dest, fstype=fstype, options=','.join(mount_options))
+        try:
+            context.mount()
+        except Exception as ex:
+            raise MountError(str(ex))
+    else:
+        status = call(['mount', '--no-mtab', '--types', fstype, '--options', ','.join(mount_options), src, dest])
 
         if status != 0:
             raise MountError('Mount failed')
