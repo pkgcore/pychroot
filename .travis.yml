@@ -10,6 +10,7 @@ install:
 script: tox
 after_success:
     # upload coverage data to coveralls.io
+    - echo ${PWD}
     - coveralls
 
     # run pylint checks
