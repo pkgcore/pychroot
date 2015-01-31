@@ -11,7 +11,8 @@ class WithParentSkip(object):
     """Context Manager class that runs context code in a child process while skipping it in the parent process.
 
     This is done by forking, doing some magic on the stack so the contents are not executed in the parent,
-    and executing the context in the forked child. Exceptions are pickled and passed through to the parent.
+    and executing the context in the forked child. Exceptions are pickled and passed back to the parent.
+
     """
     def __init__(self):
         self.__trace_lock = threading.Lock()
