@@ -1,7 +1,5 @@
 import errno
 import logging
-import os
-import sys
 
 try:
     from unittest import mock
@@ -29,18 +27,16 @@ def test_bind():
         bind('/nonexistent/src/path', '/randomdir')
     with raises(MountError):
         bind('tmpfs', '/nonexistent/dest/path')
-    with patch('chroot.utils.call', return_value=1):
+    with patch('chroot.utils.mount', side_effect=OSError):
         with raises(MountError):
-                bind('proc', '/root')
+            bind('proc', '/root')
 
     # create
-    with patch('chroot.utils.call') as call, \
+    with patch('chroot.utils.mount') as mount, \
             patch('chroot.utils.os.path.isdir') as isdir, \
             patch('chroot.utils.os.makedirs') as makedirs, \
             patch('chroot.utils.open', mock_open(), create=True) as mopen, \
             patch('chroot.utils.os.path.exists', return_value=True):
-
-        call.return_value = 0
 
         isdir.return_value = True
         bind('/fake/src', '/fake/dest', create=True)
@@ -63,4 +59,5 @@ def test_bind():
         makedirs.assert_called_once_with('/fake')
         mopen.assert_called_once_with('/fake/dest', 'w')
 
-        call.side_effect = [0, 1]
+        #with raises(MountError):
+            #bind('/', '/root', readonly=True)

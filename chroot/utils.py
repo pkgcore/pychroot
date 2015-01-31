@@ -1,12 +1,8 @@
+import ctypes
+import ctypes.util
 import errno
 import logging
 import os
-
-from subprocess import call
-try:
-    from libmount import Context
-except ImportError:
-    Context = None
 
 from chroot.exceptions import MountError
 
@@ -39,7 +35,7 @@ def getlogger(log, name):
         else logging.getLogger(name))
 
 
-def bind(src, dest, create=False, log=None, recursive=False, **_kwargs):
+def bind(src, dest, create=False, log=None, recursive=False, **kwargs):
     """Set up a bind mount.
 
     :param src: The source location to mount.
@@ -85,17 +81,46 @@ def bind(src, dest, create=False, log=None, recursive=False, **_kwargs):
         mount_options = ['rbind' if recursive else 'bind']
         log.debug("  bind mounting '{}' on '{}'".format(src, dest))
 
-    if Context is not None:
-        context = Context(source=src, target=dest, fstype=fstype, options=','.join(mount_options))
-        try:
-            context.mount()
-        except Exception as ex:
-            raise MountError(str(ex))
-    else:
-        status = call(['mount', '--no-mtab', '--types', fstype, '--options', ','.join(mount_options), src, dest])
+    mount_options = []
+    try:
+        mount(source=src, target=dest, fstype=fstype,
+              flags=(MS_BIND), data=','.join(mount_options))
+    except OSError as e:
+        raise MountError(e)
 
-        if status != 0:
-            raise MountError('Mount failed')
+# Flags synced from sys/mount.h.  See mount(2) for details.
+MS_RDONLY = 1
+MS_NOSUID = 2
+MS_NODEV = 4
+MS_NOEXEC = 8
+MS_SYNCHRONOUS = 16
+MS_REMOUNT = 32
+MS_MANDLOCK = 64
+MS_DIRSYNC = 128
+MS_NOATIME = 1024
+MS_NODIRATIME = 2048
+MS_BIND = 4096
+MS_MOVE = 8192
+MS_REC = 16384
+MS_SILENT = 32768
+MS_POSIXACL = 1 << 16
+MS_UNBINDABLE = 1 << 17
+MS_PRIVATE = 1 << 18
+MS_SLAVE = 1 << 19
+MS_SHARED = 1 << 20
+MS_RELATIME = 1 << 21
+MS_KERNMOUNT = 1 << 22
+MS_I_VERSION = 1 << 23
+MS_STRICTATIME = 1 << 24
+MS_ACTIVE = 1 << 30
+MS_NOUSER = 1 << 31
 
+
+def mount(source, target, fstype, flags, data=""):
+    """Call the mount(2) func; see the man page for details."""
+    libc = ctypes.CDLL(ctypes.util.find_library('c'), use_errno=True)
+    if libc.mount(source, target, fstype, ctypes.c_int(flags), data) != 0:
+        e = ctypes.get_errno()
+        raise OSError(e, os.strerror(e))
 
 # vim:et:ts=4:sw=4:tw=120:sts=4:ai:
