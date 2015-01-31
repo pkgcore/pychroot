@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 from multiprocessing.connection import Pipe
 import sys
@@ -104,7 +102,7 @@ class WithParentSkip(object):
     def __excepthook(_exc_type, exc_value, exc_traceback):
         """Custom excepthook to output the proper traceback information from the chroot context."""
         if hasattr(exc_value, '__traceback_list__'):
-            print(exc_value.__traceback_list__, file=sys.stderr)
+            sys.stderr.write(exc_value.__traceback_list__)
         else:
             traceback.print_tb(exc_traceback)
 
