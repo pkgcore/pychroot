@@ -36,10 +36,10 @@ manually::
     python setup.py install
 
 
-.. _`issue tracker`: https://github.com/radhermit/pychroot/issues
+.. _`issue tracker`: https://github.com/pkgcore/pychroot/issues
 
-.. |test| image:: https://travis-ci.org/radhermit/pychroot.svg?branch=master
-    :target: https://travis-ci.org/radhermit/pychroot
+.. |test| image:: https://travis-ci.org/pkgcore/pychroot.svg?branch=master
+    :target: https://travis-ci.org/pkgcore/pychroot
 
-.. |coverage| image:: https://coveralls.io/repos/radhermit/pychroot/badge.png?branch=master
-    :target: https://coveralls.io/r/radhermit/pychroot?branch=master
+.. |coverage| image:: https://coveralls.io/repos/pkgcore/pychroot/badge.png?branch=master
+    :target: https://coveralls.io/r/pkgcore/pychroot?branch=master
