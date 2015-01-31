@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 
-from distutils.core import setup, Command, Extension
+from setuptools import setup, Command, Extension
 
 import chroot
 
@@ -58,5 +58,6 @@ setup(
     license='BSD',
     packages=['chroot'],
     platforms='Posix',
+    use_2to3=True,
     cmdclass={'test': PyTest, 'lint': PyLint},
 )
