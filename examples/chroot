@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+import argparse
+import subprocess
+
+from chroot import Chroot
+
+
+def run(cmd, control=False):
+    return subprocess.call(cmd, shell=control)
+
+
+def main(path, command=None):
+    command = ' '.join(command) if command else '/bin/sh -i'
+    with Chroot(path):
+        run(command, control=True)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='A chroot(1) workalike')
+    parser.add_argument('path', help='path to newroot')
+    parser.add_argument('command', nargs='*', help='optional command to run')
+    args = parser.parse_args()
+
+    main(args.path, args.command)
