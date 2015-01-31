@@ -186,5 +186,3 @@ class WithParentSkip(object):
                 frame = frame.f_back
             self.__frame = frame  # pylint: disable=W0201
             return frame
-
-# vim:et:ts=4:sw=4:tw=120:sts=4:ai:

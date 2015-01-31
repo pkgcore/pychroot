@@ -32,6 +32,3 @@ def unshare(flags):
     if libc.unshare(ctypes.c_int(flags)) != 0:
         e = ctypes.get_errno()
         raise OSError(e, os.strerror(e))
-
-
-# vim:et:ts=4:sw=4:tw=120:sts=4:ai:

@@ -122,5 +122,3 @@ def mount(source, target, fstype, flags, data=""):
     if libc.mount(source, target, fstype, ctypes.c_int(flags), data) != 0:
         e = ctypes.get_errno()
         raise OSError(e, os.strerror(e))
-
-# vim:et:ts=4:sw=4:tw=120:sts=4:ai:

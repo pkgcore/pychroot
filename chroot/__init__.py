@@ -137,6 +137,3 @@ class Chroot(WithParentSkip):
                 bind(src=mount, dest=chrmount, log=self.log, **kwargs)
             except MountError as ex:
                 raise ChrootMountError(str(ex))
-
-
-# vim:et:ts=4:sw=4:tw=120:sts=4:ai:

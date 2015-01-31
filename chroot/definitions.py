@@ -7,5 +7,3 @@ DEFAULT_MOUNTS = {
     '/sys': {},
     '/etc/resolv.conf': {},
 }
-
-# vim:et:ts=4:sw=4:tw=120:sts=4:ai:
