@@ -5,8 +5,7 @@ except ImportError:
 from mock import Mock, patch
 from pytest import raises
 
-from chroot import unshare
-from chroot.unshare import CLONE_NEWUSER
+from chroot.namespaces import unshare, CLONE_NEWUSER
 
 
 def test_unshare():

@@ -5,17 +5,13 @@ import os
 from os.path import abspath, normpath, join, exists, basename
 import sys
 
-# pylint: disable=E0611
-# python-3.3 not yet supported in pylint
 if sys.hexversion >= 0x03030000:
     from socket import sethostname
-
-from chroot.unshare import unshare, CLONE_NEWUTS, CLONE_NEWNS, CLONE_NEWIPC  # pylint: disable=F0401
-# pylint likely will not see this stuff..
 
 from chroot.base import WithParentSkip
 from chroot.definitions import DEFAULT_MOUNTS
 from chroot.exceptions import ChrootError, ChrootMountError, MountError
+from chroot.namespaces import simple_unshare
 from chroot.utils import bind, getlogger, dictbool
 
 
@@ -73,7 +69,7 @@ class Chroot(WithParentSkip):
                 if '$' in chrmount:
                     chrmount = join(self.path, src.lstrip('/'))
 
-            if not 'optional' in opts and not exists(chrmount):
+            if 'optional' not in opts and not exists(chrmount):
                 self.mountpoints[src]['create'] = True
 
         if hostname is not None:
@@ -111,7 +107,7 @@ class Chroot(WithParentSkip):
         Use Linux namespaces to add the current process to a new UTS (hostname) namespace, new
         mount namespace and new IPC namespace.
         """
-        unshare(CLONE_NEWUTS | CLONE_NEWNS | CLONE_NEWIPC)
+        simple_unshare(pid=True)
 
         # set the hostname in the chroot process to hostname for the chroot
         if sys.hexversion >= 0x03030000:

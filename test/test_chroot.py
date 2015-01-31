@@ -24,7 +24,7 @@ def test_Chroot():
             patch('chroot.bind') as bind, \
             patch('chroot.exists') as exists, \
             patch('chroot.dictbool') as dictbool, \
-            patch('chroot.unshare') as unshare:
+            patch('chroot.simple_unshare'):
 
         c = Chroot('/')
         with raises(ChrootMountError):
@@ -51,7 +51,7 @@ def test_Chroot():
             patch('chroot.exists') as exists, \
             patch('chroot.Chroot.mount') as mount, \
             patch('chroot.os.waitpid') as waitpid, \
-            patch('chroot.unshare') as unshare:
+            patch('chroot.simple_unshare'):
 
         geteuid.return_value = 1
 
