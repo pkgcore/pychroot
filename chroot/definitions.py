@@ -5,12 +5,6 @@ DEFAULT_MOUNTS = {
     },
     '/proc': {},
     '/sys': {},
-    '/config': {
-        'optional': True,
-    },
-    '/debug': {
-        'optional': True,
-    },
     '/etc/resolv.conf': {},
 }
 
