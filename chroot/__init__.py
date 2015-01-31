@@ -15,8 +15,8 @@ from chroot.unshare import unshare, CLONE_NEWUTS, CLONE_NEWNS, CLONE_NEWIPC  # p
 
 from chroot.base import WithParentSkip
 from chroot.definitions import DEFAULT_MOUNTS
-from chroot.exceptions import ChrootError, ChrootMountError
-from chroot.utils import bind, MountError, getlogger, dictbool
+from chroot.exceptions import ChrootError, ChrootMountError, MountError
+from chroot.utils import bind, getlogger, dictbool
 
 
 class Chroot(WithParentSkip):

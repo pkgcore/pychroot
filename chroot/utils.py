@@ -8,6 +8,8 @@ try:
 except ImportError:
     Context = None
 
+from chroot.exceptions import MountError
+
 
 def dictbool(dct, key):
     """Check if a key exists and is True in a dictionary.
@@ -94,12 +96,6 @@ def bind(src, dest, create=False, log=None, recursive=False, **_kwargs):
 
         if status != 0:
             raise MountError('Mount failed')
-
-
-class MountError(Exception):
-
-    """Exception that is raised when there is an error creating a bind mount."""
-    pass
 
 
 # vim:et:ts=4:sw=4:tw=120:sts=4:ai:

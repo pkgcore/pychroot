@@ -10,4 +10,9 @@ class ChrootMountError(ChrootError):
     pass
 
 
+class MountError(Exception):
+
+    """Exception that is raised when there is an error creating a bind mount."""
+    pass
+
 # vim:et:ts=4:sw=4:tw=120:sts=4:ai:
