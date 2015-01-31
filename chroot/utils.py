@@ -50,13 +50,15 @@ def bind(src, dest, create=False, log=None, recursive=False, **kwargs):
     :type recursive: bool
     """
     log = getlogger(log, __name__)
-    if src not in ['proc', 'sysfs', 'tmpfs']:
+    fstypes = ('proc', 'sysfs', 'tmpfs')
+
+    if src not in fstypes:
         src = os.path.realpath(src)
     dest = os.path.realpath(dest)
 
     if create:
         try:
-            if not os.path.isdir(src) and src not in ['proc', 'sysfs', 'tmpfs']:
+            if not os.path.isdir(src) and src not in fstypes:
                 os.makedirs(os.path.dirname(dest))
             else:
                 os.makedirs(dest)
@@ -64,10 +66,10 @@ def bind(src, dest, create=False, log=None, recursive=False, **kwargs):
             if exception.errno != errno.EEXIST:
                 raise
 
-        if not os.path.isdir(src) and src not in ['proc', 'sysfs', 'tmpfs']:
+        if not os.path.isdir(src) and src not in fstypes:
             open(dest, 'w').close()
 
-    if not os.path.exists(src) and src not in ['proc', 'sysfs', 'tmpfs']:
+    if not os.path.exists(src) and src not in fstypes:
         raise MountError('Attempt to bind mount nonexistent source path "{}"'.format(src))
     elif not os.path.exists(dest):
         raise MountError('Attempt to bind mount on nonexistent path "{}"'.format(dest))
