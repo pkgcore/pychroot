@@ -93,7 +93,7 @@ def bind(src, dest, create=False, log=None, readonly=False,
               flags=MS_BIND, data=','.join(mount_options))
         if readonly:
             mount(source=src, target=dest, fstype=fstype,
-                  flags=(MS_RDONLY | MS_REMOUNT | MS_BIND), data=None)
+                  flags=(MS_RDONLY | MS_REMOUNT | MS_BIND), data=','.join(mount_options))
     except OSError as e:
         raise MountError(e)
 
