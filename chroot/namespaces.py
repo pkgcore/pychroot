@@ -150,7 +150,7 @@ def create_pidns():
         # Make sure to unshare the existing mount point if needed.  Some distros
         # create shared mount points everywhere by default.
         try:
-            utils.mount('none', '/proc', 0, utils.MS_PRIVATE | utils.MS_REC)
+            utils.mount('none', '/proc', 'proc', utils.MS_PRIVATE | utils.MS_REC)
         except OSError as e:
             if e.errno != errno.EINVAL:
                 raise
@@ -158,8 +158,7 @@ def create_pidns():
         # The child needs its own proc mount as it'll be different.
         utils.mount(
             'proc', '/proc', 'proc',
-            utils.MS_NOSUID | utils.MS_NODEV | utils.MS_NOEXEC |
-            utils.MS_RELATIME)
+            utils.MS_NOSUID | utils.MS_NODEV | utils.MS_NOEXEC | utils.MS_RELATIME)
 
         pid = os.fork()
         if pid:

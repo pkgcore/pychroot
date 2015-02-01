@@ -118,9 +118,10 @@ MS_ACTIVE = 1 << 30
 MS_NOUSER = 1 << 31
 
 
-def mount(source, target, fstype, flags, data=""):
+def mount(source, target, fstype, flags, data=None):
     """Call the mount(2) func; see the man page for details."""
     libc = ctypes.CDLL(ctypes.util.find_library('c'), use_errno=True)
-    if libc.mount(source, target, fstype, ctypes.c_int(flags), data) != 0:
+    if libc.mount(source.encode(), target.encode(),
+                  fstype.encode(), ctypes.c_ulong(flags), data) != 0:
         e = ctypes.get_errno()
         raise OSError(e, os.strerror(e))
