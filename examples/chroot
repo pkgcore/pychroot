@@ -1,19 +1,15 @@
 #!/usr/bin/env python
 
 import argparse
+import os.path as osp
 import subprocess
+import sys
 
-from chroot import Chroot
+sys.path.insert(1, osp.dirname(osp.dirname(osp.abspath(__file__))))
 
 
 def run(cmd, control=False):
     return subprocess.call(cmd, shell=control)
-
-
-def main(path, command=None):
-    command = ' '.join(command) if command else '/bin/sh -i'
-    with Chroot(path):
-        run(command, control=True)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='A chroot(1) workalike')
@@ -21,4 +17,12 @@ if __name__ == '__main__':
     parser.add_argument('command', nargs='*', help='optional command to run')
     args = parser.parse_args()
 
-    main(args.path, args.command)
+    try:
+        from chroot import Chroot
+    except ImportError:
+        sys.stderr.write('Cannot import chroot!\n')
+        sys.exit(1)
+
+    command = ' '.join(args.command) if args.command else '/bin/sh -i'
+    with Chroot(args.path):
+        run(command, control=True)
