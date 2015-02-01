@@ -10,7 +10,7 @@ install:
 script: tox
 after_success:
     # upload coverage data to coveralls.io
-    - pushd ${TOXENV}/lib/python*/site-packages
+    - pushd .tox/${TOXENV}/lib/python*/site-packages
     - coveralls
     - popd
 
