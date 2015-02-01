@@ -9,7 +9,6 @@ if sys.hexversion >= 0x03030000:
     from socket import sethostname
 
 from chroot.base import WithParentSkip
-from chroot.definitions import DEFAULT_MOUNTS
 from chroot.exceptions import ChrootError, ChrootMountError, MountError
 from chroot.namespaces import simple_unshare
 from chroot.utils import bind, getlogger, dictbool
@@ -33,6 +32,16 @@ class Chroot(WithParentSkip):
     :type hostname: str
     """
 
+    default_mounts = {
+        '/dev': {
+            'recursive': True,
+            'readonly': True,
+        },
+        '/proc': {},
+        '/sys': {},
+        '/etc/resolv.conf': {},
+    }
+
     def __init__(self, path, log=None, mountpoints=None, hostname=None):
         self.log = getlogger(log, __name__)
 
@@ -50,7 +59,7 @@ class Chroot(WithParentSkip):
             raise ChrootError('Attempt to chroot into a nonexistent path')
 
         self.path = abspath(path)
-        self.mountpoints = DEFAULT_MOUNTS
+        self.mountpoints = self.default_mounts
         self.mountpoints.update(mountpoints if mountpoints else {})
 
         # flag mount points that require creation and removal
