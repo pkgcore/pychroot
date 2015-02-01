@@ -71,7 +71,11 @@ class WithParentSkip(object):
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         if exc_type is self.ParentException:
-            exception = self.__pipe.recv()
+            try:
+                exception = self.__pipe.recv()
+            except EOFError as e:
+                exception = SystemExit(e)
+
             if not isinstance(exception, SystemExit):
                 os.waitpid(self.childpid, 0)
                 self.exception_cleanup()
