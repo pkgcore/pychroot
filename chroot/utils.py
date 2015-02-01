@@ -35,7 +35,8 @@ def getlogger(log, name):
         else logging.getLogger(name))
 
 
-def bind(src, dest, create=False, log=None, recursive=False, **kwargs):
+def bind(src, dest, create=False, log=None, readonly=False,
+         recursive=False, **kwargs):
     """Set up a bind mount.
 
     :param src: The source location to mount.
@@ -46,6 +47,8 @@ def bind(src, dest, create=False, log=None, recursive=False, **kwargs):
     :type create: bool
     :param log: A logger to use for logging.
     :type log: logging.Logger
+    :param readonly: Whether to remount read-only.
+    :type readonly: bool
     :param recursive: Whether to use a recursive bind mount.
     :type recursive: bool
     """
@@ -74,7 +77,7 @@ def bind(src, dest, create=False, log=None, recursive=False, **kwargs):
     elif not os.path.exists(dest):
         raise MountError('Attempt to bind mount on nonexistent path "{}"'.format(dest))
 
-    if src in ['proc', 'sysfs', 'tmpfs']:
+    if src in fstypes:
         fstype = src
         mount_options = []
         log.debug("  mounting '{}' filesystem on '{}'".format(src, dest))
@@ -84,9 +87,13 @@ def bind(src, dest, create=False, log=None, recursive=False, **kwargs):
         log.debug("  bind mounting '{}' on '{}'".format(src, dest))
 
     mount_options = []
+
     try:
         mount(source=src, target=dest, fstype=fstype,
-              flags=(MS_BIND), data=','.join(mount_options))
+              flags=MS_BIND, data=','.join(mount_options))
+        if readonly:
+            mount(source=src, target=dest, fstype=fstype,
+                  flags=(MS_RDONLY | MS_REMOUNT | MS_BIND), data=None)
     except OSError as e:
         raise MountError(e)
 
