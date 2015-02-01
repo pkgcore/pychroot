@@ -2,7 +2,14 @@ import ctypes
 import ctypes.util
 import errno
 import logging
+import operator
 import os
+
+try:
+    # py3 moved reduce into functools
+    from functools import reduce
+except ImportError:
+    pass
 
 from chroot.exceptions import MountError
 
@@ -54,6 +61,8 @@ def bind(src, dest, create=False, log=None, readonly=False,
     """
     log = getlogger(log, __name__)
     fstypes = ('proc', 'sysfs', 'tmpfs')
+    mount_flags = []
+    mount_options = []
 
     if src not in fstypes:
         src = os.path.realpath(src)
@@ -79,21 +88,23 @@ def bind(src, dest, create=False, log=None, readonly=False,
 
     if src in fstypes:
         fstype = src
-        mount_options = []
         log.debug("  mounting '{}' filesystem on '{}'".format(src, dest))
     else:
         fstype = 'none'
-        mount_options = ['rbind' if recursive else 'bind']
+        mount_flags.append(MS_BIND)
+        if recursive:
+            mount_flags.append(MS_REC)
         log.debug("  bind mounting '{}' on '{}'".format(src, dest))
-
-    mount_options = []
 
     try:
         mount(source=src, target=dest, fstype=fstype,
-              flags=MS_BIND, data=','.join(mount_options))
+              flags=reduce(operator.or_, mount_flags),
+              data=','.join(mount_options))
         if readonly:
+            mount_flags.extend([MS_REMOUNT, MS_RDONLY])
             mount(source=src, target=dest, fstype=fstype,
-                  flags=(MS_RDONLY | MS_REMOUNT | MS_BIND), data=','.join(mount_options))
+                  flags=reduce(operator.or_, mount_flags),
+                  data=','.join(mount_options))
     except OSError as e:
         raise MountError(e)
 
