@@ -2,7 +2,7 @@
 __version__ = '0.9.6'
 
 import os
-from os.path import abspath, normpath, join, exists, basename
+from os.path import abspath, join, exists, basename
 import sys
 
 if sys.hexversion >= 0x03030000:
@@ -16,19 +16,21 @@ from chroot.utils import bind, getlogger, dictbool
 
 class Chroot(WithParentSkip):
 
-    """Context Manager class that implements running the contents of the with-context in a chroot.
+    """Context manager that provides chroot support.
 
-    This is done by forking, doing some magic on the stack so the contents are not executed in the parent,
-    and executing the context in the forked child. Exceptions are pickled and passed through to the parent.
+    This is done by forking, doing some magic on the stack so the contents are
+    not executed in the parent, and executing the context in the forked child.
+    Exceptions are pickled and passed through to the parent.
 
     :param path: The path to the image to chroot into.
     :type path: str
     :param log: A log object to use for logging.
     :type log: logging.Logger
-    :param mountpoints: A dictionary defining the mountpoints to use. These can override any of the defaults
-                        or add extra mountpoints
+    :param mountpoints: A dictionary defining the mountpoints to use. These can
+        override any of the defaults or add extra mountpoints
     :type mountpoints: dict
-    :param hostname: The hostname to use in the chroot. If left blank then the basename of the path is used.
+    :param hostname: The hostname to use in the chroot. If left blank then the
+        basename of the path is used.
     :type hostname: str
     """
 
@@ -48,7 +50,7 @@ class Chroot(WithParentSkip):
         # TODO: capabilities check as well?
         # see http://marc.info/?l=python-dev&m=116406900432743
         if os.geteuid() != 0:
-            raise ChrootError('Cannot use chroot module when not running as root')
+            raise ChrootError('Must have root permissions to use chroot')
         elif hostname is not None and not isinstance(hostname, str):
             raise ChrootError('Hostname parameter passed a non-string object')
 
@@ -63,15 +65,17 @@ class Chroot(WithParentSkip):
         self.mountpoints.update(mountpoints if mountpoints else {})
 
         # flag mount points that require creation and removal
-        for mount, chrmount, opts in ((m, join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
-                                       join(self.path, m.lstrip('/')), o) for m, o in self.mountpoints.items()):
+        for mount, chrmount, opts in (
+                (m, join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
+                 join(self.path, m.lstrip('/')), o) for m, o in self.mountpoints.items()):
             src = mount
             # expand mountpoints that are environment variables
             if mount.startswith('$'):
                 src = os.getenv(mount[1:])
                 if src is None:
-                    raise ChrootMountError('Environment variable "{}" is not defined in '
-                                           'the host environment'.format(mount))
+                    raise ChrootMountError(
+                        'Environment variable "{}" is not defined in '
+                        'the host environment'.format(mount))
                 self.log.debug('Expanding mountpoint "%s" to "%s"', mount, src)
                 self.mountpoints[src] = opts
                 del self.mountpoints[mount]
@@ -96,9 +100,10 @@ class Chroot(WithParentSkip):
 
     def cleanup(self):
         # remove mount points that were dynamically created
-        for chrmount in (join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
-                         join(self.path, m.lstrip('/')) for m, o in self.mountpoints.items()
-                         if 'create' in o):
+        for chrmount in (
+                join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
+                join(self.path, m.lstrip('/')) for m, o in self.mountpoints.items()
+                if 'create' in o):
             self.log.debug('Removing dynamically created mountpoint "%s"', chrmount)
             try:
                 if not os.path.isdir(chrmount):
@@ -113,8 +118,8 @@ class Chroot(WithParentSkip):
 
     def unshare(self):
         """
-        Use Linux namespaces to add the current process to a new UTS (hostname) namespace, new
-        mount namespace and new IPC namespace.
+        Use Linux namespaces to add the current process to a new UTS (hostname)
+        namespace, new mount namespace and new IPC namespace.
         """
         simple_unshare(pid=True)
 
@@ -125,18 +130,20 @@ class Chroot(WithParentSkip):
         self.__unshared = True
 
     def mount(self):
-        """Do the bind mounts for this chroot object. This _must_ be run after unshare."""
+        """Do the bind mounts for this chroot object.
+
+        This _must_ be run after unshare.
+        """
         if not self.__unshared:
             raise ChrootMountError('Attempted to run mount method without running unshare method')
 
-        for mount, chrmount, opts in ((m, join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
-                                       join(self.path, m.lstrip('/')), o) for m, o in self.mountpoints.items()
-                                      if not m.startswith('$')):
-
+        for mount, chrmount, opts in (
+                (m, join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
+                 join(self.path, m.lstrip('/')), o) for m, o in self.mountpoints.items()
+                if not m.startswith('$')):
             if dictbool(opts, 'optional') and not exists(mount):
                 self.log.debug('Not mounting "%s" as it\'s optional and doesn\'t exist', mount)
                 continue
-
             try:
                 kwargs = {k: v for k, v in opts.items() if k != 'dest'}
                 bind(src=mount, dest=chrmount, log=self.log, **kwargs)

@@ -6,11 +6,11 @@ import traceback
 
 
 class WithParentSkip(object):
-    """Context Manager class that runs context code in a child process while skipping it in the parent process.
+    """Context manager separating code execution across parent/child processes.
 
-    This is done by forking, doing some magic on the stack so the contents are not executed in the parent,
-    and executing the context in the forked child. Exceptions are pickled and passed back to the parent.
-
+    This is done by forking and doing some magic on the stack so the contents
+    of the context are executed only on the forked child and the parent.
+    Exceptions are pickled and passed back to the parent.
     """
     def __init__(self):
         self.__trace_lock = threading.Lock()
@@ -21,19 +21,19 @@ class WithParentSkip(object):
         self.childpid = None
 
     def parent_setup(self):
-        """Run by the parent process within the context manager."""
+        """Initialization for parent process."""
         pass
 
     def child_setup(self):
-        """Run by the child process within the context manager."""
+        """Initialization for child process."""
         raise NotImplementedError
 
     def cleanup(self):
-        """Run by the parent process on termination of the child process."""
+        """Parent process clean up on termination of the child."""
         raise NotImplementedError
 
     def exception_cleanup(self):
-        """Run by the parent process when the child process throws an exception."""
+        """Parent process clean up after the child throws an exception."""
         self.cleanup()
 
     def __enter__(self):
@@ -56,7 +56,8 @@ class WithParentSkip(object):
                 self.child_setup()
 
             # pylint: disable=W0703
-            # need to catch all exceptions here since we are passing them to the parent process
+            # need to catch all exceptions here since we are passing them to
+            # the parent process
             except Exception as ex:
                 ex.__traceback_list__ = traceback.format_exc()
                 self.__pipe.send(ex)
@@ -83,9 +84,10 @@ class WithParentSkip(object):
                 raise exception
 
         elif exc_value is not None:
-            # traceback objects can't be pickled so the relevant traceback
-            # from the code executing within the chroot context is placed in
-            # the __traceback_list__ attribute and printed by a custom exception hook
+            # Unfortunately, traceback objects can't be pickled so the relevant
+            # traceback from the code executing within the chroot context is
+            # placed in the __traceback_list__ attribute and printed by a
+            # custom exception hook.
             exc_value.__traceback_list__ = traceback.format_exc()
             self.__pipe.send(exc_value)
 
@@ -104,7 +106,7 @@ class WithParentSkip(object):
 
     @staticmethod
     def __excepthook(_exc_type, exc_value, exc_traceback):
-        """Custom excepthook to output the proper traceback information from the chroot context."""
+        """Output the proper traceback information from the chroot context."""
         if hasattr(exc_value, '__traceback_list__'):
             sys.stderr.write(exc_value.__traceback_list__)
         else:
@@ -140,9 +142,10 @@ class WithParentSkip(object):
     def __inject_trace_func(self, frame, func):
         """Inject the given function as a trace function for frame.
 
-        The given function will be executed immediately as the frame's execution
-        resumes. Since it's running inside a trace hook, it can do some nasty
-        things like modify frame.f_locals, frame.f_lasti and friends.
+        The given function will be executed immediately as the frame's
+        execution resumes. Since it's running inside a trace hook, it can do
+        some nasty things like modify frame.f_locals, frame.f_lasti and
+        friends.
         """
         with self.__trace_lock:
             if frame.f_trace is not self.__invoke_trace_funcs:
@@ -174,7 +177,8 @@ class WithParentSkip(object):
         """Get the frame object corresponding to the with-statement context.
 
         This is designed to work from within superclass method call. It finds
-        the first frame in which the variable "self" is not bound to this object.
+        the first frame in which the variable "self" is not bound to this
+        object.
         """
         try:
             return self.__frame
