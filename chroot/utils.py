@@ -98,12 +98,12 @@ def bind(src, dest, create=False, log=None, readonly=False,
 
     try:
         mount(source=src, target=dest, fstype=fstype,
-              flags=reduce(operator.or_, mount_flags),
+              flags=reduce(operator.or_, mount_flags, 0),
               data=','.join(mount_options))
         if readonly:
             mount_flags.extend([MS_REMOUNT, MS_RDONLY])
             mount(source=src, target=dest, fstype=fstype,
-                  flags=reduce(operator.or_, mount_flags),
+                  flags=reduce(operator.or_, mount_flags, 0),
                   data=','.join(mount_options))
     except OSError as e:
         raise MountError(e)
