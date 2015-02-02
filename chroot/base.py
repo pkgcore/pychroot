@@ -1,5 +1,6 @@
 "Generic context manager for separating code execution across processes."
 
+import errno
 import inspect
 import os
 from multiprocessing.connection import Pipe
@@ -66,8 +67,12 @@ class WithParentSkip(object):
                 self.__pipe.send(ex)
                 try:
                     self.__pipe.send(SystemExit())
-                except (BrokenPipeError if sys.hexversion >= 0x03030000 else OSError, IOError):  # pylint: disable=E0602
-                    pass
+                except (BrokenPipeError if sys.hexversion >= 0x03030000  # pylint: disable=E0602
+                        else OSError, IOError) as ex:
+                    if ex.errno in (errno.EPIPE, errno.ESHUTDOWN):
+                        pass
+                    else:
+                        raise
                 os._exit(0)  # pylint: disable=W0212
                 # we don't want SystemExit being caught here
 
@@ -97,8 +102,12 @@ class WithParentSkip(object):
         if self.childpid is None:
             try:
                 self.__pipe.send(SystemExit())
-            except (BrokenPipeError if sys.hexversion >= 0x03030000 else OSError, IOError):  # pylint: disable=E0602
-                pass
+            except (BrokenPipeError if sys.hexversion >= 0x03030000  # pylint: disable=E0602
+                    else OSError, IOError) as ex:
+                if ex.errno in (errno.EPIPE, errno.ESHUTDOWN):
+                    pass
+                else:
+                    raise
             os._exit(0)  # pylint: disable=W0212
 
         # wait for child process to exit
