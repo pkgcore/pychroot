@@ -1,3 +1,5 @@
+"Generic context manager for separating code execution across processes."
+
 import inspect
 import os
 from multiprocessing.connection import Pipe

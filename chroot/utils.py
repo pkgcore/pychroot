@@ -1,3 +1,5 @@
+"""Various chroot-related utilities mostly dealing with bind mounting."""
+
 import ctypes
 import ctypes.util
 import errno
@@ -7,7 +9,7 @@ import os
 
 try:
     # py3 moved reduce into functools
-    from functools import reduce
+    from functools import reduce  # pylint: disable=redefined-builtin
 except ImportError:
     pass
 
@@ -43,7 +45,7 @@ def getlogger(log, name):
 
 
 def bind(src, dest, create=False, log=None, readonly=False,
-         recursive=False, **kwargs):
+         recursive=False, **_kwargs):
     """Set up a bind mount.
 
     :param src: The source location to mount.

@@ -1,3 +1,6 @@
+"Various chroot-related exception classes"
+
+
 class ChrootError(Exception):
 
     """Exception that is raised when there is an error when trying to set up a chroot."""

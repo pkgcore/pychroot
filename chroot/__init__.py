@@ -1,3 +1,4 @@
+"""pychroot is a library that simplifies chroot handling"""
 
 __version__ = '0.9.6'
 
@@ -6,7 +7,7 @@ from os.path import abspath, join, exists, basename
 import sys
 
 if sys.hexversion >= 0x03030000:
-    from socket import sethostname
+    from socket import sethostname  # pylint: disable=no-name-in-module
 
 from chroot.base import WithParentSkip
 from chroot.exceptions import ChrootError, ChrootMountError, MountError

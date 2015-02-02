@@ -36,7 +36,7 @@ load-plugins=
 # Disable '* or ** magic' warning (W0142)
 # Disable 'Catch Exception' warning (W0703)
 # Disable 'Anomalous backslash in string' warning (W1401)
-disable=W0142,W0703,W1401,E1003,E1103,R0921
+disable=W0142,W0703,W1401,E1003,E1103,R0921,abstract-class-little-used,too-many-branches
 
 
 [REPORTS]
@@ -146,7 +146,7 @@ variable-rgx=[a-z_][a-z0-9_]{2,30}$
 inlinevar-rgx=[A-Za-z_][A-Za-z0-9_]*$
 
 # Good variable names which should always be accepted, separated by a comma
-good-names=e,f,i,j,k,ex,Run,_
+good-names=e,f,i,j,k,ex,Run,_,fd,fp
 
 # Bad variable names which should always be refused, separated by a comma
 bad-names=foo,bar,baz
