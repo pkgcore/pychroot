@@ -1,3 +1,4 @@
+import inspect
 import os
 from multiprocessing.connection import Pipe
 import sys
@@ -184,8 +185,8 @@ class WithParentSkip(object):
             return self.__frame
 
         except AttributeError:
-            # offset 2 accounts for this method and the one calling it
-            frame = sys._getframe(2)  # pylint: disable=W0212
+            # an offset of two accounts for this method and its caller
+            frame = inspect.stack()[2][0]
 
             # there is no other way to do this...
             while frame.f_locals.get('self') is self:
