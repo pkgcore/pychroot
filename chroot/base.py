@@ -197,7 +197,7 @@ class WithParentSkip(object):
 
         except AttributeError:
             # an offset of two accounts for this method and its caller
-            frame = inspect.stack()[2][0]
+            frame = inspect.stack(0)[2][0]
 
             # there is no other way to do this...
             while frame.f_locals.get('self') is self:
