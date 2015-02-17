@@ -69,7 +69,7 @@ def bind(src, dest, chroot, create=False, log=None, readonly=False,
     mount_options = []
 
     if src not in fstypes:
-        src = os.path.realpath(src)
+        src = os.path.normpath(src)
     if os.path.islink(dest):
         dest = os.path.join(chroot, os.path.realpath(dest).lstrip('/'))
         if not os.path.exists(dest):
