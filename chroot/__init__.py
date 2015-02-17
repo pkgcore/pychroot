@@ -40,8 +40,9 @@ class Chroot(WithParentSkip):
             'recursive': True,
             'readonly': True,
         },
-        '/proc': {},
-        '/sys': {},
+        'proc': {'dest': '/proc'},
+        'sysfs': {'dest': '/sys'},
+        'tmpfs': {'dest': '/dev/shm'},
         '/etc/resolv.conf': {},
     }
 
