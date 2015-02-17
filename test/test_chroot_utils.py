@@ -24,12 +24,12 @@ def test_getlogger():
 
 def test_bind():
     with raises(MountError):
-        bind('/nonexistent/src/path', '/randomdir')
+        bind('/nonexistent/src/path', '/randomdir', '/chroot/path')
     with raises(MountError):
-        bind('tmpfs', '/nonexistent/dest/path')
+        bind('tmpfs', '/nonexistent/dest/path', '/chroot/path')
     with patch('chroot.utils.mount', side_effect=OSError):
         with raises(MountError):
-            bind('proc', '/root')
+            bind('proc', '/root', '/chroot/path')
 
     # create
     with patch('chroot.utils.mount') as mount, \
@@ -39,7 +39,7 @@ def test_bind():
             patch('os.path.exists', return_value=True):
 
         isdir.return_value = True
-        bind('/fake/src', '/fake/dest', create=True)
+        bind('/fake/src', '/fake/dest', '/chroot/path', create=True)
         makedirs.assert_called_once_with('/fake/dest')
         assert not mopen.called
 
@@ -49,13 +49,13 @@ def test_bind():
         e.errno = errno.EIO
         makedirs.side_effect = e
         with raises(OSError):
-            bind('/fake/src', '/fake/dest', create=True)
+            bind('/fake/src', '/fake/dest', '/chroot/path', create=True)
 
         makedirs.reset_mock()
         makedirs.side_effect = None
 
         isdir.return_value = False
-        bind('/fake/src', '/fake/dest', create=True)
+        bind('/fake/src', '/fake/dest', '/chroot/path', create=True)
         makedirs.assert_called_once_with('/fake')
         mopen.assert_called_once_with('/fake/dest', 'w')
 

@@ -44,7 +44,7 @@ def getlogger(log, name):
         else logging.getLogger(name))
 
 
-def bind(src, dest, create=False, log=None, readonly=False,
+def bind(src, dest, chroot, create=False, log=None, readonly=False,
          recursive=False, **_kwargs):
     """Set up a bind mount.
 
@@ -52,6 +52,8 @@ def bind(src, dest, create=False, log=None, readonly=False,
     :type src: str
     :param dest: The destination to mount on.
     :type dest: str
+    :param chroot: The chroot base path.
+    :type chroot: str
     :param create: Whether to create the destination.
     :type create: bool
     :param log: A logger to use for logging.
@@ -68,7 +70,12 @@ def bind(src, dest, create=False, log=None, readonly=False,
 
     if src not in fstypes:
         src = os.path.realpath(src)
-    dest = os.path.realpath(dest)
+    if os.path.islink(dest):
+        dest = os.path.join(chroot, os.path.realpath(dest).lstrip('/'))
+        if not os.path.exists(dest):
+            create = True
+    else:
+        dest = os.path.normpath(dest)
 
     if create:
         try:

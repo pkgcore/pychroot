@@ -148,6 +148,6 @@ class Chroot(WithParentSkip):
                 continue
             try:
                 kwargs = {k: v for k, v in opts.items() if k != 'dest'}
-                bind(src=mount, dest=chrmount, log=self.log, **kwargs)
+                bind(src=mount, dest=chrmount, chroot=self.path, log=self.log, **kwargs)
             except MountError as ex:
                 raise ChrootMountError(str(ex))
