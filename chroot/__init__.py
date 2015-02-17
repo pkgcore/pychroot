@@ -3,7 +3,6 @@
 __version__ = '0.9.6'
 
 import os
-from os.path import abspath, join, exists, basename
 import sys
 
 if sys.hexversion >= 0x03030000:
@@ -58,17 +57,17 @@ class Chroot(WithParentSkip):
         super(Chroot, self).__init__()
         self.__unshared = False
 
-        if not exists(abspath(path)):
+        if not os.path.exists(os.path.abspath(path)):
             raise ChrootError('Attempt to chroot into a nonexistent path')
 
-        self.path = abspath(path)
+        self.path = os.path.abspath(path)
         self.mountpoints = self.default_mounts
         self.mountpoints.update(mountpoints if mountpoints else {})
 
         # flag mount points that require creation and removal
         for mount, chrmount, opts in (
-                (m, join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
-                 join(self.path, m.lstrip('/')), o) for m, o in self.mountpoints.items()):
+                (m, os.path.join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
+                 os.path.join(self.path, m.lstrip('/')), o) for m, o in self.mountpoints.items()):
             src = mount
             # expand mountpoints that are environment variables
             if mount.startswith('$'):
@@ -81,9 +80,9 @@ class Chroot(WithParentSkip):
                 self.mountpoints[src] = opts
                 del self.mountpoints[mount]
                 if '$' in chrmount:
-                    chrmount = join(self.path, src.lstrip('/'))
+                    chrmount = os.path.join(self.path, src.lstrip('/'))
 
-            if 'optional' not in opts and not exists(chrmount):
+            if 'optional' not in opts and not os.path.exists(chrmount):
                 self.mountpoints[src]['create'] = True
 
         if hostname is not None:
@@ -91,7 +90,7 @@ class Chroot(WithParentSkip):
             if sys.hexversion < 0x03030000:
                 self.log.warn('Unable to set hostname on Python < 3.3')
         else:
-            self.hostname = basename(self.path)
+            self.hostname = os.path.basename(self.path)
 
     def child_setup(self):
         self.unshare()
@@ -102,8 +101,8 @@ class Chroot(WithParentSkip):
     def cleanup(self):
         # remove mount points that were dynamically created
         for chrmount in (
-                join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
-                join(self.path, m.lstrip('/')) for m, o in self.mountpoints.items()
+                os.path.join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
+                os.path.join(self.path, m.lstrip('/')) for m, o in self.mountpoints.items()
                 if 'create' in o):
             self.log.debug('Removing dynamically created mountpoint "%s"', chrmount)
             try:
@@ -139,10 +138,10 @@ class Chroot(WithParentSkip):
             raise ChrootMountError('Attempted to run mount method without running unshare method')
 
         for mount, chrmount, opts in (
-                (m, join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
-                 join(self.path, m.lstrip('/')), o) for m, o in self.mountpoints.items()
+                (m, os.path.join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
+                 os.path.join(self.path, m.lstrip('/')), o) for m, o in self.mountpoints.items()
                 if not m.startswith('$')):
-            if dictbool(opts, 'optional') and not exists(mount):
+            if dictbool(opts, 'optional') and not os.path.exists(mount):
                 self.log.debug('Not mounting "%s" as it\'s optional and doesn\'t exist', mount)
                 continue
             try:

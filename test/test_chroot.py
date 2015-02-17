@@ -20,9 +20,9 @@ def test_Chroot():
         sethostname = patcher.start()
 
     # testing Chroot.mount()
-    with patch('chroot.os.geteuid', return_value=0), \
+    with patch('os.geteuid', return_value=0), \
             patch('chroot.bind') as bind, \
-            patch('chroot.exists') as exists, \
+            patch('os.path.exists') as exists, \
             patch('chroot.dictbool') as dictbool, \
             patch('chroot.simple_unshare'):
 
@@ -42,15 +42,15 @@ def test_Chroot():
         c.mount()
         assert not bind.called
 
-    with patch('chroot.os.geteuid') as geteuid, \
-            patch('chroot.os.fork') as fork, \
-            patch('chroot.os.chroot') as chroot, \
-            patch('chroot.os.chdir') as chdir, \
-            patch('chroot.os.remove') as remove, \
-            patch('chroot.os._exit') as exit, \
-            patch('chroot.exists') as exists, \
+    with patch('os.geteuid') as geteuid, \
+            patch('os.fork') as fork, \
+            patch('os.chroot') as chroot, \
+            patch('os.chdir') as chdir, \
+            patch('os.remove') as remove, \
+            patch('os._exit') as exit, \
+            patch('os.path.exists') as exists, \
+            patch('os.waitpid') as waitpid, \
             patch('chroot.Chroot.mount') as mount, \
-            patch('chroot.os.waitpid') as waitpid, \
             patch('chroot.simple_unshare'):
 
         geteuid.return_value = 1

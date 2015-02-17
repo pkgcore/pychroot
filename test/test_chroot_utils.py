@@ -33,10 +33,10 @@ def test_bind():
 
     # create
     with patch('chroot.utils.mount') as mount, \
-            patch('chroot.utils.os.path.isdir') as isdir, \
-            patch('chroot.utils.os.makedirs') as makedirs, \
+            patch('os.path.isdir') as isdir, \
+            patch('os.makedirs') as makedirs, \
             patch('chroot.utils.open', mock_open(), create=True) as mopen, \
-            patch('chroot.utils.os.path.exists', return_value=True):
+            patch('os.path.exists', return_value=True):
 
         isdir.return_value = True
         bind('/fake/src', '/fake/dest', create=True)
