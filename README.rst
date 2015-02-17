@@ -36,9 +36,9 @@ environments.
 Requirements
 ============
 
-Python versions 2.7, 3.3, 3.4 are supported. Note however, that the library is
-quite Linux specific mainly due to the use of namespaces which requires kernel
-support as well.
+Python versions 2.7, 3.3, 3.4 are supported. Note however, that pychroot is
+quite Linux specific due to the use of namespaces via the `snakeoil`_ library
+which also require proper kernel support.
 
 Issues
 ======
@@ -72,6 +72,7 @@ manually::
 
 
 .. _`issue tracker`: https://github.com/pkgcore/pychroot/issues
+.. _`snakeoil`: https://github.com/pkgcore/snakeoil
 
 .. |test| image:: https://travis-ci.org/pkgcore/pychroot.svg?branch=master
     :target: https://travis-ci.org/pkgcore/pychroot
