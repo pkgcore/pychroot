@@ -12,7 +12,8 @@ except ImportError:
     pass
 
 from chroot.exceptions import MountError
-from chroot.mount import mount, MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY
+
+from snakeoil.osutils import mount, MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY
 
 
 def dictbool(dct, key):
