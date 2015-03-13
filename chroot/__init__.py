@@ -63,7 +63,7 @@ class Chroot(WithParentSkip):
             raise ChrootError('Attempt to chroot into a nonexistent path')
 
         self.path = os.path.abspath(path)
-        self.mountpoints = self.default_mounts
+        self.mountpoints = self.default_mounts.copy()
         self.mountpoints.update(mountpoints if mountpoints else {})
 
         # flag mount points that require creation and removal
