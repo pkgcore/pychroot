@@ -49,12 +49,17 @@ class PyLint(RunCommand):
         raise SystemExit(errno)
 
 
+with open('README.rst', 'r') as f:
+    readme = f.read()
+
 setup(
     name='chroot',
     version=chroot.__version__,
     description='Python module to make working with chroots much easier',
+    long_description=readme,
     author='Tim Harder',
     author_email='radhermit@gmail.com',
+    url='https://github.com/pkgcore/pychroot',
     license='BSD',
     packages=['chroot'],
     platforms='Posix',
