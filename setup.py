@@ -55,7 +55,7 @@ with open('README.rst', 'r') as f:
 setup(
     name='chroot',
     version=chroot.__version__,
-    description='Python module to make working with chroots much easier',
+    description='a python library that simplifies chroot handling',
     long_description=readme,
     author='Tim Harder',
     author_email='radhermit@gmail.com',
@@ -65,4 +65,11 @@ setup(
     platforms='Posix',
     use_2to3=True,
     cmdclass={'test': PyTest, 'lint': PyLint},
+    classifiers=(
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+    ),
 )
