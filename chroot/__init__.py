@@ -1,6 +1,6 @@
 """pychroot is a library that simplifies chroot handling"""
 
-__version__ = '0.9.6'
+__version__ = '0.9.7'
 
 import os
 import sys
