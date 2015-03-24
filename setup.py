@@ -57,7 +57,7 @@ with open('README.rst', 'r') as f:
     readme = f.read()
 
 setup(
-    name='chroot',
+    name='pychroot',
     version=chroot.__version__,
     description='a python library that simplifies chroot handling',
     long_description=readme,
