@@ -49,6 +49,10 @@ class PyLint(RunCommand):
         raise SystemExit(errno)
 
 
+test_requirements = ['pytest']
+if sys.hexversion < 0x03030000:
+    test_requirements.append('mock')
+
 with open('README.rst', 'r') as f:
     readme = f.read()
 
@@ -63,6 +67,8 @@ setup(
     license='BSD',
     packages=['chroot'],
     platforms='Posix',
+    install_requires=['snakeoil>=0.6.1'],
+    tests_require=test_requirements,
     use_2to3=True,
     cmdclass={'test': PyTest, 'lint': PyLint},
     classifiers=(
