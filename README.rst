@@ -58,6 +58,8 @@ which is also integrated into setup.py, run via::
 
 A tox config is also provided so it's possible to run tests for all supported
 versions of python by just calling *tox* in the git repo's root directory.
+Also, note that mock_ is required for tests if you're using anything less than
+python 3.3.
 
 Installing
 ==========
@@ -73,6 +75,7 @@ manually::
 
 .. _`issue tracker`: https://github.com/pkgcore/pychroot/issues
 .. _`snakeoil`: https://github.com/pkgcore/snakeoil
+.. _mock: https://pypi.python.org/pypi/mock
 
 .. |test| image:: https://travis-ci.org/pkgcore/pychroot.svg?branch=master
     :target: https://travis-ci.org/pkgcore/pychroot
