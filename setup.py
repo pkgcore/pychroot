@@ -1,6 +1,8 @@
+#!/usr/bin/env python
+
 import os
-import sys
 import subprocess
+import sys
 
 from setuptools import setup, Command, Extension
 
