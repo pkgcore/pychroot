@@ -33,6 +33,20 @@ from the host system. By default, new mount, UTS, IPC, and pid namespaces are
 used. This allows for simplified handling of the teardown phase for the chroot
 environments.
 
+One quirk of note is that currently local variables are not propagated back
+from the chroot context to the main context due to the usage of separate
+processes running the contexts. This means that something similar to the
+following won't work::
+
+    from chroot import Chroot
+
+    with Chroot('/path/to/chroot'):
+        a = 42
+    print(a)
+
+In this case, a NameError exception will be raised unless *a* was previously
+defined. This will probably be fixed to some extent in a future release.
+
 Requirements
 ============
 
