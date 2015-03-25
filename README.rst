@@ -71,9 +71,9 @@ which is also integrated into setup.py, run via::
     python setup.py test
 
 A tox config is also provided so it's possible to run tests for all supported
-versions of python by just calling *tox* in the git repo's root directory.
-Also, note that mock_ is required for tests if you're using anything less than
-python 3.3.
+versions of python by just calling *tox* in the project's root directory. Also,
+note that mock_ is required for tests if you're using anything less than python
+3.3.
 
 Installing
 ==========
