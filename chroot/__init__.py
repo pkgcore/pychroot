@@ -1,7 +1,5 @@
 """pychroot is a library that simplifies chroot handling"""
 
-__version__ = '0.9.7'
-
 import os
 import sys
 
@@ -11,6 +9,7 @@ if sys.hexversion >= 0x03030000:
 from chroot.base import WithParentSkip
 from chroot.exceptions import ChrootError, ChrootMountError, MountError
 from chroot.utils import bind, getlogger, dictbool
+from chroot.version import __version__
 
 from snakeoil.namespaces import simple_unshare
 

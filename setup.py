@@ -6,7 +6,7 @@ import sys
 
 from setuptools import setup, Command, Extension
 
-import chroot
+from chroot.version import __version__
 
 
 class RunCommand(Command):
@@ -60,7 +60,7 @@ with open('README.rst', 'r') as f:
 
 setup(
     name='pychroot',
-    version=chroot.__version__,
+    version=__version__,
     description='a python library that simplifies chroot handling',
     long_description=readme,
     author='Tim Harder',
