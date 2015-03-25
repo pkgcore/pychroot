@@ -6,8 +6,6 @@ import sys
 
 from setuptools import setup, Command, Extension
 
-from chroot.version import __version__
-
 
 class RunCommand(Command):
     user_options = []
@@ -50,6 +48,9 @@ class PyLint(RunCommand):
                                 cli_options + ['chroot'] + standaloneModules)
         raise SystemExit(errno)
 
+# workaround to get version without importing anything
+with open('pychroot/_version.py') as f:
+    exec(f.read())
 
 test_requirements = ['pytest']
 if sys.hexversion < 0x03030000:

@@ -9,7 +9,7 @@ if sys.hexversion >= 0x03030000:
 from chroot.base import WithParentSkip
 from chroot.exceptions import ChrootError, ChrootMountError, MountError
 from chroot.utils import bind, getlogger, dictbool
-from chroot.version import __version__
+from chroot._version import __version__
 
 from snakeoil.namespaces import simple_unshare
 
