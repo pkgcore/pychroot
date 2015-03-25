@@ -49,7 +49,7 @@ class PyLint(RunCommand):
         raise SystemExit(errno)
 
 # workaround to get version without importing anything
-with open('pychroot/_version.py') as f:
+with open('chroot/_version.py') as f:
     exec(f.read())
 
 test_requirements = ['pytest']
