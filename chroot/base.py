@@ -134,7 +134,10 @@ class WithParentSkip(object):
         pass
 
     def __enable_tracing(self):
-        """Enable system-wide tracing, if it wasn't already."""
+        """Enable system-wide tracing.
+
+        If tracing is already enabled nothing is done.
+        """
         try:
             self.__orig_sys_trace = sys.gettrace()
         except AttributeError:
@@ -143,7 +146,7 @@ class WithParentSkip(object):
             sys.settrace(self.__dummy_sys_trace)
 
     def __disable_tracing(self):
-        """Disable system-wide tracing, if we specifically switched it on."""
+        """Disable system-wide tracing, if it was specifically switched on."""
         if self.__orig_sys_trace is None:
             sys.settrace(None)
 
@@ -152,12 +155,10 @@ class WithParentSkip(object):
         raise self.ParentException()
 
     def __inject_trace_func(self, frame, func):
-        """Inject the given function as a trace function for frame.
+        """Inject a trace function for a frame.
 
-        The given function will be executed immediately as the frame's
-        execution resumes. Since it's running inside a trace hook, it can do
-        some nasty things like modify frame.f_locals, frame.f_lasti and
-        friends.
+        The given trace function will be executed immediately when the frame's
+        execution resumes.
         """
         with self.__trace_lock:
             if frame.f_trace is not self.__invoke_trace_funcs:
@@ -169,11 +170,10 @@ class WithParentSkip(object):
         self.__injected_trace_funcs[frame].append(func)
 
     def __invoke_trace_funcs(self, frame, *_args, **_kwargs):
-        """Invoke any trace funcs that have been injected.
+        """Invoke all trace funcs that have been injected.
 
-        Once all injected functions have been executed, the trace hooks are
-        removed. Hopefully this will keep the overhead of all this madness
-        to a minimum :-)
+        Once the injected functions have been executed all trace hooks are
+        removed in order to minimize overhead.
         """
         try:
             for func in self.__injected_trace_funcs[frame]:
@@ -186,11 +186,10 @@ class WithParentSkip(object):
                 frame.f_trace = self.__orig_trace_funcs.pop(frame)
 
     def __get_context_frame(self):
-        """Get the frame object corresponding to the with-statement context.
+        """Get the frame object for the with-statement context.
 
         This is designed to work from within superclass method call. It finds
-        the first frame in which the variable "self" is not bound to this
-        object.
+        the first frame where the local variable "self" doesn't exist.
         """
         try:
             return self.__frame
@@ -199,7 +198,6 @@ class WithParentSkip(object):
             # an offset of two accounts for this method and its caller
             frame = inspect.stack(0)[2][0]
 
-            # there is no other way to do this...
             while frame.f_locals.get('self') is self:
                 frame = frame.f_back
             self.__frame = frame  # pylint: disable=W0201
