@@ -1,6 +1,4 @@
 *.py[co]
-.coverage
-htmlcov
 .*.swp
 .*.un~
 
@@ -14,5 +12,6 @@ eggs
 sdist
 
 # Unit test / coverage reports
+htmlcov
 .coverage
 .tox
