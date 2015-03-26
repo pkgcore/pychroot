@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-"Generic context manager for separating code execution across processes."
+"""Generic context manager for separating code execution across processes."""
 
 import errno
 import inspect

@@ -1,4 +1,4 @@
-"Various chroot-related exception classes"
+"""Various chroot-related exception classes"""
 
 
 class ChrootError(Exception):
