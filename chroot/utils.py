@@ -1,15 +1,10 @@
 """Various chroot-related utilities mostly dealing with bind mounting."""
 
 import errno
+from functools import reduce  # pylint: disable=redefined-builtin
 import logging
 import operator
 import os
-
-try:
-    # py3 moved reduce into functools
-    from functools import reduce  # pylint: disable=redefined-builtin
-except ImportError:
-    pass
 
 from chroot.exceptions import MountError
 
