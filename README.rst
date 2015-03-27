@@ -1,11 +1,4 @@
-.. image:: https://img.shields.io/pypi/v/pychroot.svg
-    :target: https://pypi.python.org/pypi/pychroot
-
-.. image:: https://travis-ci.org/pkgcore/pychroot.svg?branch=master
-    :target: https://travis-ci.org/pkgcore/pychroot
-
-.. image:: https://coveralls.io/repos/pkgcore/pychroot/badge.png?branch=master
-    :target: https://coveralls.io/r/pkgcore/pychroot?branch=master
+|pypi| |test| |coverage|
 
 ========
 pychroot
@@ -97,3 +90,10 @@ manually::
 .. _`issue tracker`: https://github.com/pkgcore/pychroot/issues
 .. _`snakeoil`: https://github.com/pkgcore/snakeoil
 .. _mock: https://pypi.python.org/pypi/mock
+
+.. |pypi| image:: https://img.shields.io/pypi/v/pychroot.svg
+    :target: https://pypi.python.org/pypi/pychroot
+.. |test| image:: https://travis-ci.org/pkgcore/pychroot.svg?branch=master
+    :target: https://travis-ci.org/pkgcore/pychroot
+.. |coverage| image:: https://coveralls.io/repos/pkgcore/pychroot/badge.png?branch=master
+    :target: https://coveralls.io/r/pkgcore/pychroot?branch=master
