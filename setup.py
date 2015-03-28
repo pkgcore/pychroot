@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 
-from setuptools import setup, Command, Extension
+from setuptools import setup, Command
 
 
 class RunCommand(Command):
