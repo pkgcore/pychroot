@@ -9,7 +9,6 @@ MANIFEST
 dist
 build
 eggs
-sdist
 
 # Unit test / coverage reports
 htmlcov
