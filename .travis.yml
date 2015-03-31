@@ -4,10 +4,7 @@ env:
     - TOXENV=py27
     - TOXENV=py33
     - TOXENV=py34
-install:
-    - pip install tox coveralls pylint
-    - pip install git+https://github.com/pkgcore/snakeoil
-    - python setup.py install
+install: pip install tox coveralls pylint
 script: tox
 after_success:
     # upload coverage data to coveralls.io
