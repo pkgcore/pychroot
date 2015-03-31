@@ -6,7 +6,6 @@ try:
     from unittest import mock
 except ImportError:
     import mock
-from mock import patch
 from pytest import raises
 
 from chroot import Chroot
@@ -16,15 +15,15 @@ from chroot.utils import MountError
 
 def test_Chroot():
     if sys.hexversion >= 0x03030000:
-        patcher = patch('chroot.sethostname')
+        patcher = mock.patch('chroot.sethostname')
         sethostname = patcher.start()
 
     # testing Chroot.mount()
-    with patch('os.geteuid', return_value=0), \
-            patch('chroot.bind') as bind, \
-            patch('os.path.exists') as exists, \
-            patch('chroot.dictbool') as dictbool, \
-            patch('chroot.simple_unshare'):
+    with mock.patch('os.geteuid', return_value=0), \
+            mock.patch('chroot.bind') as bind, \
+            mock.patch('os.path.exists') as exists, \
+            mock.patch('chroot.dictbool') as dictbool, \
+            mock.patch('chroot.simple_unshare'):
 
         c = Chroot('/')
         with raises(ChrootMountError):
@@ -42,16 +41,16 @@ def test_Chroot():
         c.mount()
         assert not bind.called
 
-    with patch('os.geteuid') as geteuid, \
-            patch('os.fork') as fork, \
-            patch('os.chroot') as chroot, \
-            patch('os.chdir') as chdir, \
-            patch('os.remove') as remove, \
-            patch('os._exit') as exit, \
-            patch('os.path.exists') as exists, \
-            patch('os.waitpid') as waitpid, \
-            patch('chroot.Chroot.mount') as mount, \
-            patch('chroot.simple_unshare'):
+    with mock.patch('os.geteuid') as geteuid, \
+            mock.patch('os.fork') as fork, \
+            mock.patch('os.chroot') as chroot, \
+            mock.patch('os.chdir') as chdir, \
+            mock.patch('os.remove') as remove, \
+            mock.patch('os._exit') as exit, \
+            mock.patch('os.path.exists') as exists, \
+            mock.patch('os.waitpid') as waitpid, \
+            mock.patch('chroot.Chroot.mount') as mount, \
+            mock.patch('chroot.simple_unshare'):
 
         geteuid.return_value = 1
 
@@ -75,7 +74,7 @@ def test_Chroot():
         with raises(ChrootMountError):
             Chroot('/', mountpoints={'$FAKEVAR': {}})
 
-        with patch('chroot.os.getenv', return_value='/fake/src/path'):
+        with mock.patch('chroot.os.getenv', return_value='/fake/src/path'):
             Chroot('/', mountpoints={'$FAKEVAR': {}})
 
         # test parent process
@@ -112,4 +111,4 @@ def test_Chroot():
             pass
         chdir.side_effect = None
 
-        patch.stopall()
+        mock.patch.stopall()
