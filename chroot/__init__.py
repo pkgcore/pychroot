@@ -73,8 +73,7 @@ class Chroot(WithParentSkip):
                 src = os.getenv(mount[1:])
                 if src is None:
                     raise ChrootMountError(
-                        'Environment variable "{}" is not defined in '
-                        'the host environment'.format(mount))
+                        'Host environment variable undefined: {}'.format(mount))
                 self.log.debug('Expanding mountpoint "%s" to "%s"', mount, src)
                 self.mountpoints[src] = opts
                 del self.mountpoints[mount]
@@ -111,7 +110,7 @@ class Chroot(WithParentSkip):
         for _, chrmount, opts in self.mounts:
             if 'create' not in opts:
                 continue
-            self.log.debug('Removing dynamically created mountpoint "%s"', chrmount)
+            self.log.debug('Removing dynamically created mountpoint: %s', chrmount)
             try:
                 if not os.path.isdir(chrmount):
                     os.remove(chrmount)
@@ -121,7 +120,7 @@ class Chroot(WithParentSkip):
             except OSError:
                 pass
             except:
-                raise ChrootMountError('Failed to remove chroot mount point "{}"'.format(chrmount))
+                raise ChrootMountError('Failed to remove chroot mount point: {}'.format(chrmount))
 
     def unshare(self):
         """
@@ -148,7 +147,7 @@ class Chroot(WithParentSkip):
             if mount.startswith('$'):
                 continue
             if dictbool(opts, 'optional') and not os.path.exists(mount):
-                self.log.debug("Not mounting '%s' as it's optional and doesn't exist", mount)
+                self.log.debug('Skipping optional and nonexistent mountpoint: %s', mount)
                 continue
             try:
                 kwargs = {k: v for k, v in opts.items() if k != 'dest'}
