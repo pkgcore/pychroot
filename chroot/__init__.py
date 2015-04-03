@@ -66,9 +66,7 @@ class Chroot(WithParentSkip):
         self.mountpoints.update(mountpoints if mountpoints else {})
 
         # flag mount points that require creation and removal
-        for mount, chrmount, opts in (
-                (m, os.path.join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
-                 os.path.join(self.path, m.lstrip('/')), o) for m, o in self.mountpoints.items()):
+        for mount, chrmount, opts in self.mounts:
             src = mount
             # expand mountpoints that are environment variables
             if mount.startswith('$'):
@@ -93,6 +91,15 @@ class Chroot(WithParentSkip):
         else:
             self.hostname = os.path.basename(self.path)
 
+    @property
+    def mounts(self):
+        for source, options in self.mountpoints.items():
+            if 'dest' in options:
+                dest = os.path.join(self.path, options['dest'].lstrip('/'))
+            else:
+                dest = os.path.join(self.path, source.lstrip('/'))
+            yield source, dest, options
+
     def child_setup(self):
         self.unshare()
         self.mount()
@@ -101,10 +108,9 @@ class Chroot(WithParentSkip):
 
     def cleanup(self):
         # remove mount points that were dynamically created
-        for chrmount in (
-                os.path.join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
-                os.path.join(self.path, m.lstrip('/')) for m, o in self.mountpoints.items()
-                if 'create' in o):
+        for _, chrmount, opts in self.mounts:
+            if 'create' not in opts:
+                continue
             self.log.debug('Removing dynamically created mountpoint "%s"', chrmount)
             try:
                 if not os.path.isdir(chrmount):
@@ -138,12 +144,11 @@ class Chroot(WithParentSkip):
         if not self.__unshared:
             raise ChrootMountError('Attempted to run mount method without running unshare method')
 
-        for mount, chrmount, opts in (
-                (m, os.path.join(self.path, o['dest'].lstrip('/')) if 'dest' in o else
-                 os.path.join(self.path, m.lstrip('/')), o) for m, o in self.mountpoints.items()
-                if not m.startswith('$')):
+        for mount, chrmount, opts in self.mounts:
+            if mount.startswith('$'):
+                continue
             if dictbool(opts, 'optional') and not os.path.exists(mount):
-                self.log.debug('Not mounting "%s" as it\'s optional and doesn\'t exist', mount)
+                self.log.debug("Not mounting '%s' as it's optional and doesn't exist", mount)
                 continue
             try:
                 kwargs = {k: v for k, v in opts.items() if k != 'dest'}
