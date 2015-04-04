@@ -70,7 +70,7 @@ setup(
     license='BSD',
     packages=['chroot'],
     platforms='Posix',
-    install_requires=['snakeoil>=0.6.1'],
+    install_requires=['snakeoil>=0.6.2'],
     tests_require=test_requirements,
     use_2to3=True,
     cmdclass={'test': PyTest, 'lint': PyLint},
