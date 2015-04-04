@@ -69,10 +69,11 @@ setup(
     url='https://github.com/pkgcore/pychroot',
     license='BSD',
     packages=['chroot'],
-    platforms='Posix',
+    entry_points={'console_scripts': ['pychroot = chroot.cli:main']},
     install_requires=['snakeoil>=0.6.2'],
     tests_require=test_requirements,
     use_2to3=True,
+    platforms='Posix',
     cmdclass={'test': PyTest, 'lint': PyLint},
     classifiers=(
         'Intended Audience :: Developers',
