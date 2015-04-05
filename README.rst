@@ -23,8 +23,9 @@ By default, this will bind mount the host's /dev, /proc, and /sys filesystems
 into the chroot as well as the /etc/resolv.conf file (so DNS resolution works
 as expected in the chroot).
 
-A simple chroot(1) utility is installed as well as **pychroot**. It allows for
-extended capabilities in terms of specifying custom bind mounts to perform, for example::
+A simple chroot equivalent utility is installed as well as **pychroot**. It
+allows for extended capabilities in terms of specifying custom bind mounts to
+perform, for example::
 
     sudo pychroot -B /home/user1 ~/chroot
 
@@ -77,10 +78,9 @@ which is also integrated into setup.py, run via::
 
     python setup.py test
 
-A tox config is also provided so it's possible to run tests for all supported
-versions of python by just calling *tox* in the project's root directory. Also,
-note that mock_ is required for tests if you're using anything less than python
-3.3.
+Also, tests for all supported python versions can be run together or
+individually via tox. Note that mock_ is required for tests if you're using
+anything less than python 3.3.
 
 Installing
 ==========
