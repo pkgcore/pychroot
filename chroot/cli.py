@@ -40,5 +40,5 @@ def main():
     try:
         with Chroot(args.path, mountpoints=args.mountpoints):
             subprocess.call(command, shell=True)
-    except (ChrootError, ChrootMountError) as e:
+    except (ChrootError, ChrootMountError, KeyboardInterrupt) as e:
         raise SystemExit(e)
