@@ -39,9 +39,9 @@ class Chroot(WithParentSkip):
             'recursive': True,
             'readonly': True,
         },
-        'proc': {'dest': '/proc'},
-        'sysfs': {'dest': '/sys'},
-        'tmpfs': {'dest': '/dev/shm'},
+        '/proc': {},
+        '/sys': {},
+        'tmpfs:/dev/shm': {},
         '/etc/resolv.conf': {},
     }
 
@@ -66,22 +66,22 @@ class Chroot(WithParentSkip):
         self.mountpoints.update(mountpoints if mountpoints else {})
 
         # flag mount points that require creation and removal
-        for mount, chrmount, opts in self.mounts:
-            src = mount
+        for k, source, chrmount, opts in self.mounts:
+            src = source
             # expand mountpoints that are environment variables
-            if mount.startswith('$'):
-                src = os.getenv(mount[1:])
+            if source.startswith('$'):
+                src = os.getenv(source[1:])
                 if src is None:
                     raise ChrootMountError(
-                        'Host environment variable undefined: {}'.format(mount))
-                self.log.debug('Expanding mountpoint "%s" to "%s"', mount, src)
+                        'Host environment variable undefined: {}'.format(source))
+                self.log.debug('Expanding mountpoint "%s" to "%s"', source, src)
                 self.mountpoints[src] = opts
-                del self.mountpoints[mount]
+                del self.mountpoints[k]
                 if '$' in chrmount:
                     chrmount = os.path.join(self.path, src.lstrip('/'))
 
             if 'optional' not in opts and not os.path.exists(chrmount):
-                self.mountpoints[src]['create'] = True
+                self.mountpoints[k]['create'] = True
 
         if hostname is not None:
             self.hostname = hostname
@@ -92,12 +92,12 @@ class Chroot(WithParentSkip):
 
     @property
     def mounts(self):
-        for source, options in self.mountpoints.items():
-            if 'dest' in options:
-                dest = os.path.join(self.path, options['dest'].lstrip('/'))
-            else:
-                dest = os.path.join(self.path, source.lstrip('/'))
-            yield source, dest, options
+        for k, options in self.mountpoints.items():
+            source, _, dest = k.partition(':')
+            if not dest:
+                dest = source
+            dest = os.path.join(self.path, dest.lstrip('/'))
+            yield k, source, dest, options
 
     def child_setup(self):
         self.unshare()
@@ -107,7 +107,7 @@ class Chroot(WithParentSkip):
 
     def cleanup(self):
         # remove mount points that were dynamically created
-        for _, chrmount, opts in self.mounts:
+        for _, _, chrmount, opts in self.mounts:
             if 'create' not in opts:
                 continue
             self.log.debug('Removing dynamically created mountpoint: %s', chrmount)
@@ -143,14 +143,13 @@ class Chroot(WithParentSkip):
         if not self.__unshared:
             raise ChrootMountError('Attempted to run mount method without running unshare method')
 
-        for mount, chrmount, opts in self.mounts:
-            if mount.startswith('$'):
+        for _, source, chrmount, opts in self.mounts:
+            if source.startswith('$'):
                 continue
-            if dictbool(opts, 'optional') and not os.path.exists(mount):
-                self.log.debug('Skipping optional and nonexistent mountpoint: %s', mount)
+            if dictbool(opts, 'optional') and not os.path.exists(source):
+                self.log.debug('Skipping optional and nonexistent mountpoint: %s', source)
                 continue
             try:
-                kwargs = {k: v for k, v in opts.items() if k != 'dest'}
-                bind(src=mount, dest=chrmount, chroot=self.path, log=self.log, **kwargs)
+                bind(src=source, dest=chrmount, chroot=self.path, log=self.log, **opts)
             except MountError as ex:
                 raise ChrootMountError(str(ex))

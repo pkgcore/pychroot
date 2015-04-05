@@ -94,12 +94,12 @@ def test_Chroot():
         # make sure the default mount points aren't altered
         # when passing custom mount points
         default_mounts = Chroot.default_mounts.copy()
-        c = Chroot('/', mountpoints={'tmpfs': {'dest': '/tmp'}})
+        c = Chroot('/', mountpoints={'tmpfs:/tmp': {}})
         assert default_mounts == c.default_mounts
 
         remove.side_effect = Exception('fake exception')
         exists.side_effect = chain([True], cycle([False]))
-        c = Chroot('/', mountpoints={'/root': {'dest': '/blah'}})
+        c = Chroot('/', mountpoints={'/root:/blah': {}})
         with raises(ChrootMountError):
             with c:
                 pass
