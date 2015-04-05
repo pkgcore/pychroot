@@ -28,7 +28,7 @@ extended capabilities in terms of specifying custom bind mounts to perform, for 
 
     sudo pychroot -B /home/user1 ~/chroot
 
-will bind mount user1's home directory into the same location inside the chroot
+will bind mount user1's home directory at the same location inside the chroot
 directory in addition to the standard bind mounts listed previously. See
 pychroot's help output for more options.
 
