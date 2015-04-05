@@ -23,10 +23,17 @@ By default, this will bind mount the host's /dev, /proc, and /sys filesystems
 into the chroot as well as the /etc/resolv.conf file (so DNS resolution works
 as expected in the chroot).
 
-To customize that, **Chroot** accepts a *mountpoints* parameter that is a
-dictionary of mappings to be merged with the defaults. Otherwise, it is also
-possible to override the default mountpoints. See the documentation for more
-details.
+A simple chroot(1) utility is installed as well as **pychroot**. It allows for
+extended capabilities in terms of specifying custom bind mounts to perform, for example::
+
+    sudo pychroot -B /home/user1 ~/chroot
+
+will bind mount user1's home directory into the same location inside the chroot
+directory in addition to the standard bind mounts listed previously. See
+pychroot's help output for more options.
+
+Notes
+=====
 
 Namespaces are used by the context manager to segregate the chroot instance
 from the host system. By default, new mount, UTS, IPC, and pid namespaces are
