@@ -23,15 +23,17 @@ By default, this will bind mount the host's /dev, /proc, and /sys filesystems
 into the chroot as well as the /etc/resolv.conf file (so DNS resolution works
 as expected in the chroot).
 
-A simple chroot equivalent utility is installed as well as **pychroot**. It
-allows for extended capabilities in terms of specifying custom bind mounts to
-perform, for example::
+A simple chroot equivalent is installed is also installed as **pychroot**. It
+can be simply used in a similar fashion to chroot (via ``sudo pychroot
+~/chroot`` or similar); however, this also performs the bind mounts previously
+mentioned so the environment is usable. In addition, it supports specifying
+custom bind mounts, for example::
 
     sudo pychroot -B /home/user1 ~/chroot
 
 will bind mount user1's home directory at the same location inside the chroot
-directory in addition to the standard bind mounts listed previously. See
-pychroot's help output for more options.
+directory in addition to the standard bind mounts. See pychroot's help output
+for more options.
 
 Notes
 =====
