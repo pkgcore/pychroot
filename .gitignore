@@ -10,6 +10,10 @@ dist
 build
 eggs
 
+# docs
+/doc/_build
+/doc/api
+
 # Unit test / coverage reports
 htmlcov
 .coverage
