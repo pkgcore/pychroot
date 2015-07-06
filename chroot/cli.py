@@ -38,7 +38,7 @@ def main():
 
     command = ' '.join(args.command) if args.command else '/bin/sh -i'
     try:
-        with Chroot(args.path, mountpoints=args.mountpoints):
+        with Chroot(args.path, mountpoints=getattr(args, 'mountpoints', None)):
             subprocess.call(command, shell=True)
     except (ChrootError, ChrootMountError, KeyboardInterrupt) as e:
         raise SystemExit(e)
