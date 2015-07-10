@@ -1,6 +1,6 @@
 import argparse
 from functools import partial
-import subprocess
+import os
 
 from chroot import Chroot
 from chroot.exceptions import ChrootError, ChrootMountError
@@ -37,8 +37,12 @@ def main():
     args = parser.parse_args()
 
     command = ' '.join(args.command) if args.command else '/bin/sh -i'
+    command = command.split()
+    binary = command[0]
+    binary_args = command[1:] if command[1:] else ['']
+
     try:
         with Chroot(args.path, mountpoints=getattr(args, 'mountpoints', None)):
-            subprocess.call(command, shell=True)
+            os.execvp(binary, binary_args)
     except (ChrootError, ChrootMountError, KeyboardInterrupt) as e:
         raise SystemExit(e)
