@@ -1,6 +1,8 @@
 import argparse
+import errno
 from functools import partial
 import os
+import sys
 
 from chroot import Chroot
 from chroot.exceptions import ChrootError, ChrootMountError
@@ -44,5 +46,11 @@ def main():
     try:
         with Chroot(args.path, mountpoints=getattr(args, 'mountpoints', None)):
             os.execvp(binary, binary_args)
+    except EnvironmentError as e:
+        if (e.errno == errno.ENOENT):
+            raise SystemExit(
+                "%s: failed to run command '%s': %s" %
+                (os.path.basename(sys.argv[0]), binary, e.strerror))
+        raise
     except (ChrootError, ChrootMountError, KeyboardInterrupt) as e:
         raise SystemExit(e)
