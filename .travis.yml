@@ -1,14 +1,14 @@
 language: python
-python: 3.4
-env:
-    - TOXENV=py27
-    - TOXENV=py33
-    - TOXENV=py34
+python:
+    - 2.7
+    - 3.3
+    - 3.4
+sudo: false
 install: pip install 'tox<2' coveralls pylint
-script: tox
+script: tox -e py${TRAVIS_PYTHON_VERSION/\./}
 after_success:
     # upload coverage data to coveralls.io
-    - pushd .tox/${TOXENV}/lib/python*/site-packages
+    - pushd .tox/py${TRAVIS_PYTHON_VERSION/\./}/lib/python*/site-packages
     - coveralls
     - popd
 
