@@ -32,6 +32,9 @@ def main():
         '-R', '--rbind', type=partial(bindmount, recursive=True),
         action=mountpoints, metavar='SRC[:DEST]',
         help='specify custom recursive bind mount')
+
+    # Readonly support and similar things should be made into mount arg
+    # attributes once readonly, recursive bind mounts are supported on Linux.
     parser.add_argument(
         '--ro', '--readonly', type=partial(bindmount, readonly=True),
         action=mountpoints, metavar='SRC[:DEST]',
