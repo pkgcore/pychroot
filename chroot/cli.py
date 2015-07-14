@@ -39,15 +39,21 @@ def main():
         '--ro', '--readonly', type=partial(bindmount, readonly=True),
         action=mountpoints, metavar='SRC[:DEST]',
         help='specify custom readonly bind mount')
-    args = parser.parse_args()
 
-    command = ' '.join(args.command) if args.command else '/bin/sh -i'
+    options = parser.parse_args()
+
+    if options.command:
+        command = ' '.join(options.command)
+    else:
+        command = '%s -i' % os.environ.get('SHELL', '/bin/sh')
     command = command.split()
+
     binary = command[0]
+    # execv requires a nonempty second argument
     binary_args = command[1:] if command[1:] else ['']
 
     try:
-        with Chroot(args.path, mountpoints=getattr(args, 'mountpoints', None)):
+        with Chroot(options.path, mountpoints=getattr(options, 'mountpoints', None)):
             os.execvp(binary, binary_args)
     except EnvironmentError as e:
         if (e.errno == errno.ENOENT):
