@@ -21,7 +21,7 @@ class mountpoints(argparse.Action):
         namespace.mountpoints.update(values)
 
 
-def main():
+def parse_args(args):
     parser = argparse.ArgumentParser(description='A simple chroot(1) workalike')
     parser.add_argument('path', help='path to newroot')
     parser.add_argument('command', nargs='*', help='optional command to run')
@@ -40,7 +40,12 @@ def main():
         action=mountpoints, metavar='SRC[:DEST]',
         help='specify custom readonly bind mount')
 
-    options = parser.parse_args()
+    return parser.parse_args(args)
+
+
+def main(args=None):
+    args = args if args is not None else sys.argv[1:]
+    options = parse_args(args)
 
     if options.command:
         command = ' '.join(options.command)
