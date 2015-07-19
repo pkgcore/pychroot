@@ -45,7 +45,7 @@ def parse_args(args):
     if opts.command:
         command = ' '.join(opts.command)
     else:
-        command = '%s -i' % os.environ.get('SHELL', '/bin/sh')
+        command = '%s -i' % os.getenv('SHELL', '/bin/sh')
     command = command.split()
 
     opts.binary = command[0]

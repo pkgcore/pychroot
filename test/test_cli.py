@@ -1,5 +1,3 @@
-import os
-
 try:
     from unittest import mock
 except ImportError:
@@ -18,17 +16,15 @@ def test_arg_parsing():
     with raises(SystemExit):
         opts = cli.parse_args('--foo --bar dir'.split())
 
-    os.environ['SHELL'] = 'shell'
-
     # single newroot arg with $SHELL from env
-    opts = cli.parse_args(['dir'])
-    assert opts.path == 'dir'
-    assert opts.binary == 'shell'
-    assert opts.binary_args == ['-i']
-    assert 'mountpoints' not in opts
+    with mock.patch('os.getenv', return_value='shell'):
+        opts = cli.parse_args(['dir'])
+        assert opts.path == 'dir'
+        assert opts.binary == 'shell'
+        assert opts.binary_args == ['-i']
+        assert 'mountpoints' not in opts
 
     # default shell
-    del os.environ['SHELL']
     opts = cli.parse_args(['dir'])
     assert opts.binary == '/bin/sh'
     assert opts.binary_args == ['-i']
