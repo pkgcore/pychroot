@@ -25,7 +25,7 @@ def test_arg_parsing():
         assert 'mountpoints' not in opts
 
     # default shell when $SHELL isn't defined in the env
-    with mock.patch.dict('os.environ', {}):
+    with mock.patch.dict('os.environ', {}, clear=True):
         opts = cli.parse_args(['dir'])
         assert opts.binary == '/bin/sh'
         assert opts.binary_args == ['-i']
