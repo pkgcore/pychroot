@@ -40,31 +40,34 @@ def parse_args(args):
         action=mountpoints, metavar='SRC[:DEST]',
         help='specify custom readonly bind mount')
 
-    return parser.parse_args(args)
+    opts = parser.parse_args(args)
 
-
-def main(args=None):
-    args = args if args is not None else sys.argv[1:]
-    options = parse_args(args)
-
-    if options.command:
-        command = ' '.join(options.command)
+    if opts.command:
+        command = ' '.join(opts.command)
     else:
         command = '%s -i' % os.environ.get('SHELL', '/bin/sh')
     command = command.split()
 
-    binary = command[0]
+    opts.binary = command[0]
     # execv requires a nonempty second argument
-    binary_args = command[1:] if command[1:] else ['']
+    opts.binary_args = command[1:] if command[1:] else ['']
+
+    del opts.command
+    return opts
+
+
+def main(args=None):
+    args = args if args is not None else sys.argv[1:]
+    opts = parse_args(args)
 
     try:
-        with Chroot(options.path, mountpoints=getattr(options, 'mountpoints', None)):
-            os.execvp(binary, binary_args)
+        with Chroot(opts.path, mountpoints=getattr(opts, 'mountpoints', None)):
+            os.execvp(opts.binary, opts.binary_args)
     except EnvironmentError as e:
         if (e.errno == errno.ENOENT):
             raise SystemExit(
                 "%s: failed to run command '%s': %s" %
-                (os.path.basename(sys.argv[0]), binary, e.strerror))
+                (os.path.basename(sys.argv[0]), opts.binary, e.strerror))
         raise
     except (ChrootError, ChrootMountError, KeyboardInterrupt) as e:
         raise SystemExit(e)
