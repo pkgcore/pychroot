@@ -4,7 +4,7 @@ python:
     - 3.3
     - 3.4
 sudo: false
-install: pip install 'tox<2' coveralls pylint
+install: pip install 'tox<2' 'coveralls>0.5' pylint
 script: tox -e py${TRAVIS_PYTHON_VERSION/\./}
 after_success:
     # upload coverage data to coveralls.io
