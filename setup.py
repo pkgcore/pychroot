@@ -64,7 +64,7 @@ setup(
     license='BSD',
     packages=['chroot'],
     entry_points={'console_scripts': ['pychroot = chroot.cli:main']},
-    install_requires=['snakeoil>=0.6.2'],
+    install_requires=['snakeoil>=0.6.5'],
     tests_require=test_requirements,
     use_2to3=True,
     platforms='Posix',
