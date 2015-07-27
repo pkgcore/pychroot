@@ -4,7 +4,7 @@ from functools import partial
 import os
 import sys
 
-from chroot import Chroot
+from chroot.base import Chroot
 from chroot.exceptions import ChrootError, ChrootMountError
 
 
