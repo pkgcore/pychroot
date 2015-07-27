@@ -9,30 +9,23 @@ from setuptools import setup, Command
 from chroot import __version__
 
 
-class RunCommand(Command):
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-
-class PyTest(RunCommand):
+class PyTest(Command):
     user_options = [('match=', 'k', 'Run only tests that match the provided expressions')]
 
     def initialize_options(self):
         self.match = None
 
+    def finalize_options(self):
+        pass
+
     def run(self):
+        from snakeoil.process import find_binary
         cli_options = ['-k', self.match] if self.match else []
-        os.environ['EPYTHON'] = 'python{}.{}'.format(sys.version_info.major, sys.version_info.minor)
-        errno = subprocess.call(['py.test'] + cli_options)
+        errno = subprocess.call([sys.executable, find_binary('py.test')] + cli_options)
         raise SystemExit(errno)
 
 
-class PyLint(RunCommand):
+class PyLint(Command):
     user_options = [('errorsonly', 'E', 'Check only errors with pylint'),
                     ('format=', 'f', 'Change the output format')]
 
@@ -40,13 +33,16 @@ class PyLint(RunCommand):
         self.errorsonly = 0
         self.format = 'colorized'
 
+    def finalize_options(self):
+        pass
+
     def run(self):
+        from snakeoil.process import find_binary
         rcfile = os.path.abspath('.pylintrc')
-        os.environ['EPYTHON'] = 'python{}.{}'.format(sys.version_info.major, sys.version_info.minor)
         standaloneModules = [m for m in []]
         cli_options = ['-E'] if self.errorsonly else []
         cli_options.append('--output-format={0}'.format(self.format))
-        errno = subprocess.call(['pylint', '--rcfile={}'.format(rcfile), '--output-format=colorized'] +
+        errno = subprocess.call([sys.executable, find_binary('pylint'), '--rcfile={}'.format(rcfile), '--output-format=colorized'] +
                                 cli_options + ['chroot'] + standaloneModules)
         raise SystemExit(errno)
 
