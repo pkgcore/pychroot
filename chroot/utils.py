@@ -110,4 +110,5 @@ def bind(src, dest, chroot, create=False, log=None, readonly=False,
                   flags=reduce(operator.or_, mount_flags, 0),
                   data=','.join(mount_options))
     except OSError as e:
-        raise MountError(e)
+        raise MountError(
+            'Failed mounting: mount -t %s %s %s: %s' % (fstype, src, dest, e.strerror))
