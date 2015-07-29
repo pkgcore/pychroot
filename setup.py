@@ -19,9 +19,8 @@ class PyTest(Command):
         pass
 
     def run(self):
-        from snakeoil.process import find_binary
         cli_options = ['-k', self.match] if self.match else []
-        errno = subprocess.call([sys.executable, find_binary('py.test')] + cli_options)
+        errno = subprocess.call([sys.executable, '-m', 'pytest'] + cli_options)
         raise SystemExit(errno)
 
 
@@ -37,12 +36,11 @@ class PyLint(Command):
         pass
 
     def run(self):
-        from snakeoil.process import find_binary
         rcfile = os.path.abspath('.pylintrc')
         standaloneModules = [m for m in []]
         cli_options = ['-E'] if self.errorsonly else []
         cli_options.append('--output-format={0}'.format(self.format))
-        errno = subprocess.call([sys.executable, find_binary('pylint'), '--rcfile={}'.format(rcfile), '--output-format=colorized'] +
+        errno = subprocess.call([sys.executable, '-m', 'pylint', '--rcfile={}'.format(rcfile), '--output-format=colorized'] +
                                 cli_options + ['chroot'] + standaloneModules)
         raise SystemExit(errno)
 
