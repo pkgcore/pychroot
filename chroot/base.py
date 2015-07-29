@@ -7,11 +7,11 @@ if sys.hexversion >= 0x03030000:
 from chroot.exceptions import ChrootError, ChrootMountError, MountError
 from chroot.utils import bind, getlogger, dictbool
 
-from snakeoil.contextlib import WithParentSkip
+from snakeoil.contextlib import SplitExec
 from snakeoil.namespaces import simple_unshare
 
 
-class Chroot(WithParentSkip):
+class Chroot(SplitExec):
 
     """Context manager that provides chroot support.
 
