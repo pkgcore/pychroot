@@ -24,7 +24,7 @@ class mountpoints(argparse.Action):
 def parse_args(args):
     parser = argparse.ArgumentParser(description='A simple chroot(1) workalike')
     parser.add_argument('path', help='path to newroot')
-    parser.add_argument('command', nargs='*', help='optional command to run')
+    parser.add_argument('command', nargs=argparse.REMAINDER, help='optional command to run')
     parser.add_argument(
         '-B', '--bind', type=bindmount, action=mountpoints, metavar='SRC[:DEST]',
         help='specify custom bind mount')
@@ -42,17 +42,9 @@ def parse_args(args):
 
     opts = parser.parse_args(args)
 
-    if opts.command:
-        command = ' '.join(opts.command)
-    else:
-        command = '%s -i' % os.getenv('SHELL', '/bin/sh')
-    command = command.split()
+    if not opts.command:
+        opts.command = [os.getenv('SHELL', '/bin/sh'), '-i']
 
-    opts.binary = command[0]
-    # execv requires a nonempty second argument
-    opts.binary_args = command[1:] if command[1:] else ['']
-
-    del opts.command
     return opts
 
 
@@ -62,12 +54,12 @@ def main(args=None):
 
     try:
         with Chroot(opts.path, mountpoints=getattr(opts, 'mountpoints', None)):
-            os.execvp(opts.binary, opts.binary_args)
+            os.execvp(opts.command[0], opts.command)
     except EnvironmentError as e:
         if (e.errno == errno.ENOENT):
             raise SystemExit(
                 "%s: failed to run command '%s': %s" %
-                (os.path.basename(sys.argv[0]), opts.binary, e.strerror))
+                (os.path.basename(sys.argv[0]), opts.command[0], e.strerror))
         raise
     except (ChrootError, ChrootMountError, KeyboardInterrupt) as e:
         raise SystemExit(e)

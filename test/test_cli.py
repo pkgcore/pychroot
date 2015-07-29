@@ -1,7 +1,9 @@
+import shlex
 try:
     from unittest import mock
 except ImportError:
     import mock
+
 from pytest import raises
 
 from chroot import cli
@@ -20,21 +22,18 @@ def test_arg_parsing():
     with mock.patch('os.getenv', return_value='shell'):
         opts = cli.parse_args(['dir'])
         assert opts.path == 'dir'
-        assert opts.binary == 'shell'
-        assert opts.binary_args == ['-i']
+        assert opts.command == ['shell', '-i']
         assert 'mountpoints' not in opts
 
     # default shell when $SHELL isn't defined in the env
     with mock.patch.dict('os.environ', {}, clear=True):
         opts = cli.parse_args(['dir'])
-        assert opts.binary == '/bin/sh'
-        assert opts.binary_args == ['-i']
+        assert opts.command == ['/bin/sh', '-i']
 
     # complex args
-    opts = cli.parse_args('-R /home -B /tmp --ro /var dir cmd arg'.split())
+    opts = cli.parse_args(shlex.split('-R /home -B /tmp --ro /var dir cmd arg "arg1 arg2"'))
     assert opts.path == 'dir'
-    assert opts.binary == 'cmd'
-    assert opts.binary_args == ['arg']
+    assert opts.command == ['cmd', 'arg', 'arg1 arg2']
     assert opts.path == 'dir'
     assert opts.mountpoints == {
         '/home': {'recursive': True, 'readonly': False},
