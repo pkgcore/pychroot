@@ -22,12 +22,14 @@ class mountpoints(argparse.Action):
 
 
 def parse_args(args):
-    parser = argparse.ArgumentParser(description='A simple chroot(1) workalike')
+    parser = argparse.ArgumentParser(
+        description='A chroot(1) clone with extended functionality.')
     parser.add_argument('path', help='path to newroot')
-    parser.add_argument('command', nargs=argparse.REMAINDER, help='optional command to run')
     parser.add_argument(
-        '-B', '--bind', type=bindmount, action=mountpoints, metavar='SRC[:DEST]',
-        help='specify custom bind mount')
+        'command', nargs=argparse.REMAINDER, help='optional command to run')
+    parser.add_argument(
+        '-B', '--bind', type=bindmount, action=mountpoints,
+        metavar='SRC[:DEST]', help='specify custom bind mount')
     parser.add_argument(
         '-R', '--rbind', type=partial(bindmount, recursive=True),
         action=mountpoints, metavar='SRC[:DEST]',
