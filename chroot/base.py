@@ -148,5 +148,5 @@ class Chroot(WithParentSkip):
                 continue
             try:
                 bind(src=source, dest=chrmount, chroot=self.path, log=self.log, **opts)
-            except MountError as ex:
-                raise ChrootMountError(str(ex))
+            except MountError as e:
+                raise ChrootMountError(e)

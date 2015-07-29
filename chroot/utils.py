@@ -78,8 +78,8 @@ def bind(src, dest, chroot, create=False, log=None, readonly=False,
                 os.makedirs(os.path.dirname(dest))
             else:
                 os.makedirs(dest)
-        except OSError as exception:
-            if exception.errno != errno.EEXIST:
+        except OSError as e:
+            if e.errno != errno.EEXIST:
                 raise
 
         if not os.path.isdir(src) and src not in fstypes:
