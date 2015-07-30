@@ -9,6 +9,7 @@ from chroot.utils import bind, getlogger, dictbool
 
 from snakeoil.contextlib import SplitExec
 from snakeoil.namespaces import simple_unshare
+from snakeoil.osutils import mount, MS_REC, MS_SLAVE
 
 
 class Chroot(SplitExec):
@@ -139,6 +140,10 @@ class Chroot(SplitExec):
         """
         if not self.__unshared:
             raise ChrootMountError('Attempted to run mount method without running unshare method')
+
+        # Allow mount propagation from the host to chroot namespace, but not
+        # from chroot to host.
+        mount('none', '/', 'none', MS_REC | MS_SLAVE)
 
         for _, source, chrmount, opts in self.mounts:
             if source.startswith('$'):
