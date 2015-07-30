@@ -143,7 +143,7 @@ class Chroot(SplitExec):
 
         # Allow mount propagation from the host to chroot namespace, but not
         # from chroot to host.
-        mount('none', '/', 'none', MS_REC | MS_SLAVE)
+        mount(None, '/', None, MS_REC | MS_SLAVE)
 
         for _, source, chrmount, opts in self.mounts:
             if source.startswith('$'):

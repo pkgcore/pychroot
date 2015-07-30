@@ -90,15 +90,15 @@ def test_bind():
             # recursive mount
             isdir.return_value = True
             bind(src, dest, chroot, create=True, recursive=True)
-            mount.assert_called_once_with(source=src, target=dest, fstype='none', flags=(MS_BIND | MS_REC), data='')
+            mount.assert_called_once_with(source=src, target=dest, fstype=None, flags=(MS_BIND | MS_REC), data='')
 
             mount.reset_mock()
 
             # readonly mount
             isdir.return_value = True
             bind(src, dest, chroot, create=True, readonly=True)
-            call1 = mock.call(source=src, target=dest, fstype='none', flags=(MS_BIND), data='')
-            call2 = mock.call(source=src, target=dest, fstype='none', flags=(MS_BIND | MS_REMOUNT | MS_RDONLY), data='')
+            call1 = mock.call(source=src, target=dest, fstype=None, flags=(MS_BIND), data='')
+            call2 = mock.call(source=src, target=dest, fstype=None, flags=(MS_BIND | MS_REMOUNT | MS_RDONLY), data='')
             mount.assert_has_calls([call1, call2])
 
             #with raises(MountError):

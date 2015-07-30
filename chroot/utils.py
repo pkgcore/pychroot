@@ -94,7 +94,7 @@ def bind(src, dest, chroot, create=False, log=None, readonly=False,
         fstype = src
         log.debug("  mounting '{}' filesystem on '{}'".format(src, dest))
     else:
-        fstype = 'none'
+        fstype = None
         mount_flags.append(MS_BIND)
         if recursive:
             mount_flags.append(MS_REC)
