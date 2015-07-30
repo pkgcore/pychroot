@@ -7,7 +7,8 @@ from tempfile import mkdtemp
 try:
     from unittest import mock
 except ImportError:
-    import  mock
+    import mock
+
 from pytest import raises
 from snakeoil.osutils import MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY
 
@@ -37,20 +38,19 @@ def test_bind():
     # create
     with mock.patch('chroot.utils.mount') as mount, \
             mock.patch('os.path.isdir') as isdir, \
-            mock.patch('os.makedirs') as makedirs, \
-            mock.patch('chroot.utils.open', mock.mock_open(), create=True) as mock_open:
+            mock.patch('os.makedirs') as makedirs:
 
         try:
             # tempfile.TemporaryDirectory is only availabile in >=3.2
             src = mkdtemp(prefix='pychroot-src')
             chroot = mkdtemp(prefix='pychroot-chroot')
             dest = os.path.join(chroot, 'dest')
+            destfile = os.path.join(chroot, 'destfile')
             os.mkdir(dest)
 
             isdir.return_value = True
             bind(src, dest, chroot, create=True)
             makedirs.assert_called_once_with(dest)
-            assert not mock_open.called
 
             makedirs.reset_mock()
 
@@ -80,10 +80,10 @@ def test_bind():
             makedirs.reset_mock()
             makedirs.side_effect = None
 
+            # bind an individual file
             isdir.return_value = False
-            bind(src, dest, chroot, create=True)
+            bind(src, destfile, chroot, create=True)
             makedirs.assert_called_once_with(chroot)
-            mock_open.assert_called_once_with(dest, 'w')
 
             mount.reset_mock()
 

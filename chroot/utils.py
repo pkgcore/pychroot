@@ -8,6 +8,7 @@ import os
 
 from chroot.exceptions import MountError
 
+from snakeoil.fileutils import touch
 from snakeoil.osutils import mount, MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY
 
 
@@ -83,7 +84,7 @@ def bind(src, dest, chroot, create=False, log=None, readonly=False,
                 raise
 
         if not os.path.isdir(src) and src not in fstypes:
-            open(dest, 'w').close()
+            touch(dest)
 
     if not os.path.exists(src) and src not in fstypes:
         raise MountError('Attempt to bind mount nonexistent source path "{}"'.format(src))
