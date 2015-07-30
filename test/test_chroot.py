@@ -23,6 +23,7 @@ def test_Chroot():
             mock.patch('chroot.base.bind') as bind, \
             mock.patch('os.path.exists') as exists, \
             mock.patch('chroot.base.dictbool') as dictbool, \
+            mock.patch('chroot.base.mount') as mount, \
             mock.patch('chroot.base.simple_unshare'):
 
         c = Chroot('/')
