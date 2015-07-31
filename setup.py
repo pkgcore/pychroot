@@ -2,12 +2,11 @@
 
 from io import open
 import os
+import re
 import subprocess
 import sys
 
 from setuptools import setup, Command
-
-from chroot import __version__
 
 
 class PyTest(Command):
@@ -49,14 +48,22 @@ test_requirements = ['pytest']
 if sys.hexversion < 0x03030000:
     test_requirements.append('mock')
 
-with open('README.rst', 'r', 'utf-8') as f:
+version = ''
+with open('chroot/__init__.py', 'r', encoding='utf-8') as f:
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+                        f.read(), re.MULTILINE).group(1)
+
+if not version:
+    raise RuntimeError('Cannot find version')
+
+with open('README.rst', 'r', encoding='utf-8') as f:
     readme = f.read()
-with open('NEWS.rst', 'r', 'utf-8') as f:
+with open('NEWS.rst', 'r', encoding='utf-8') as f:
     news = f.read()
 
 setup(
     name='pychroot',
-    version=__version__,
+    version=version,
     description='a python library that simplifies chroot handling',
     long_description=readme + '\n\n' + news,
     author='Tim Harder',
