@@ -57,7 +57,7 @@ class Chroot(SplitExec):
         self.__unshared = False
 
         if not os.path.exists(os.path.abspath(path)):
-            raise ChrootError('Attempt to chroot into a nonexistent path')
+            raise ChrootError("nonexistent root directory: '{}'".format(path))
 
         self.path = os.path.abspath(path)
         self.mountpoints = self.default_mounts.copy()

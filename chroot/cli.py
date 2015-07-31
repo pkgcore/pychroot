@@ -60,8 +60,8 @@ def main(args=None):
     except EnvironmentError as e:
         if (e.errno == errno.ENOENT):
             raise SystemExit(
-                "%s: failed to run command '%s': %s" %
-                (os.path.basename(sys.argv[0]), opts.command[0], e.strerror))
+                "{}: failed to run command '{}': {}".format(
+                os.path.basename(sys.argv[0]), opts.command[0], e.strerror))
         raise
     except (ChrootError, ChrootMountError, KeyboardInterrupt) as e:
-        raise SystemExit(e)
+        raise SystemExit('{}: {}'.format(os.path.basename(sys.argv[0]), str(e)))
