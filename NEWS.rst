@@ -20,8 +20,8 @@ pychroot 0.9.12 (2015-0?-??)
   will work as expected (i.e. how they normally work with chroot).
 
 - Allow mount propagation from the host mount namespace to the chroot's but not
-  vice versa. Previously system's that would set the rootfs mount as shared,
-  e.g. running something like::
+  vice versa. Previously systems that set the rootfs mount as shared, e.g.
+  running something like::
 
     mount --make-rshared /
 
