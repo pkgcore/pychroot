@@ -1,9 +1,13 @@
+import errno
+import os
 import shlex
+import tempfile
 try:
     from unittest import mock
 except ImportError:
     import mock
 
+import pytest
 from pytest import raises
 
 from chroot import cli
@@ -44,17 +48,53 @@ def test_arg_parsing():
 
 def test_cli():
     # no root perms
-    with raises(SystemExit) as e:
+    with raises(SystemExit):
         cli.main(['nonexistent-dir'])
-        assert 'permissions' in str(e.value)
 
-    # pretend we're root
-    with mock.patch('os.geteuid', return_value=0):
+    with mock.patch('os.geteuid', return_value=0), \
+            mock.patch('os.fork') as fork, \
+            mock.patch('os.chroot') as chroot, \
+            mock.patch('os._exit') as exit, \
+            mock.patch('os.waitpid') as waitpid, \
+            mock.patch('chroot.utils.mount') as mount, \
+            mock.patch('os.execvp') as execvp, \
+            mock.patch('chroot.base.simple_unshare'):
+
         # no args
         with raises(SystemExit):
             cli.main([])
 
         # nonexistent newroot dir
-        with raises(SystemExit) as e:
+        with raises(SystemExit):
             cli.main(['nonexistent-dir'])
-            assert 'nonexistent path' in str(e.value)
+
+    with mock.patch('chroot.cli.Chroot'), \
+            mock.patch('os.execvp') as execvp:
+
+        chroot = tempfile.mkdtemp()
+
+        # exec arg testing
+        cli.main([chroot])
+        shell = os.getenv('SHELL', '/bin/sh')
+        execvp.assert_called_once_with(shell, [shell, '-i'])
+        execvp.reset_mock()
+
+        cli.main([chroot, 'ls -R /'])
+        execvp.assert_called_once_with('ls -R /', ['ls -R /'])
+        execvp.reset_mock()
+
+        e = EnvironmentError("command doesn't exist")
+        e.errno = errno.ENOENT
+        execvp.side_effect = e
+        with raises(SystemExit):
+            cli.main([chroot])
+        execvp.reset_mock()
+
+        e = EnvironmentError('fake exception')
+        e.errno = errno.EIO
+        execvp.side_effect = e
+        with raises(EnvironmentError):
+            cli.main([chroot])
+        execvp.reset_mock()
+
+        os.rmdir(chroot)
