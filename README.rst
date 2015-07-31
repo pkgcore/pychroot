@@ -24,16 +24,15 @@ into the chroot as well as the /etc/resolv.conf file (so DNS resolution works
 as expected in the chroot).
 
 A simple chroot equivalent is also installed as **pychroot**. It can be used in
-a similar fashion to chroot (via ``sudo pychroot ~/chroot``); however, this
-also performs the bind mounts previously mentioned so the environment is
-usable. In addition, pychroot supports specifying custom bind mounts, for
-example::
+a similar fashion to chroot; however, it also performs the bind mounts
+previously mentioned so the environment is usable. In addition, pychroot
+supports specifying custom bind mounts, for example::
 
-    sudo pychroot -B /home/user1 ~/chroot
+    sudo pychroot -R /home/user ~/chroot
 
-will bind mount user1's home directory at the same location inside the chroot
-directory in addition to the standard bind mounts. See pychroot's help output
-for more options.
+will recursively bind mount the user's home directory at the same location
+inside the chroot directory in addition to the standard bind mounts. See
+pychroot's help output for more options.
 
 Notes
 =====
