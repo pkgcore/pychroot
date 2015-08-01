@@ -32,6 +32,12 @@ pychroot 0.9.12 (2015-0?-??)
   host's so mount events will propagate down from host to chroot, but not back
   up from chroot to host.
 
+- Add support for setting the chroot's host and domain names for all versions
+  of python. Previously we only supported setting the hostname for py33 and up.
+  To set the domain name, pass an FQDN instead of a singular hostname. This
+  also adds a "--hostname" option to the pychroot script that enables the same
+  support for it.
+
 pychroot 0.9.11 (2015-07-05)
 ----------------------------
 

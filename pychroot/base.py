@@ -25,7 +25,9 @@ class Chroot(SplitExec):
     :param mountpoints: A dictionary defining the mountpoints to use. These can
         override any of the defaults or add extra mountpoints
     :type mountpoints: dict
-    :param hostname: The hostname for the chroot, defaults to the system hostname
+    :param hostname: The hostname for the chroot, defaults to the system
+    hostname. In order to set the chroot domain name as well specify an
+        FQDN instead of a singular hostname.
     :type hostname: str
     """
 
