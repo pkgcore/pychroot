@@ -9,7 +9,7 @@ import os
 from chroot.exceptions import MountError
 
 from snakeoil.fileutils import touch
-from snakeoil.osutils import mount, MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY
+from snakeoil.osutils.mount import mount, MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY
 
 
 def dictbool(dct, key):
