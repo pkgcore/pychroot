@@ -13,6 +13,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import errno
+from importlib import import_module
 import os
 import subprocess
 import sys
@@ -20,12 +22,31 @@ import sys
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(1, os.path.abspath('..'))
+sys.path.insert(1, os.path.abspath('.'))
+sys.path.insert(2, os.path.abspath('..'))
 
 from pychroot import __version__
+from generate_man_rsts import ManConverter
 
-# generate API docs
-subprocess.call(['sphinx-apidoc', '-Tf', '-o', 'api', '../pychroot'])
+
+def generate_docs():
+    """Generate various supporting files for building docs"""
+    try:
+        os.mkdir('generated')
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            return
+        raise
+
+    generated_man_pages = [('pychroot.cli', 'pychroot')]
+
+    # generate man page option docs
+    for module, script in generated_man_pages:
+        os.symlink(os.path.join(os.pardir, 'generated', script), os.path.join('man', script))
+        ManConverter.regen_if_needed('generated', module, out_name=script)
+
+    # generate API docs
+    subprocess.call(['sphinx-apidoc', '-Tf', '-o', 'api', '../pychroot'])
 
 # -- General configuration ------------------------------------------------
 
@@ -243,13 +264,13 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pychroot', 'pychroot Documentation',
-     ['Tim Harder'], 1)
+    ('man/pychroot', 'pychroot', import_module('pychroot.cli').__doc__.split('\n', 1)[0], ['Tim Harder'], 1)
 ]
 
 # If true, show URL addresses after external links.
 #man_show_urls = False
 
+generate_docs()
 
 # -- Options for Texinfo output -------------------------------------------
 
