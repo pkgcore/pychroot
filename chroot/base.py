@@ -69,10 +69,17 @@ class Chroot(SplitExec):
             src = source
             # expand mountpoints that are environment variables
             if source.startswith('$'):
-                src = os.getenv(source[1:])
-                if src is None:
-                    raise ChrootMountError(
-                        'Host environment variable undefined: {}'.format(source))
+                src = os.getenv(source[1:], source)
+                if src == source:
+                    if 'optional' in opts:
+                        self.log.debug(
+                            'Skipping optional and nonexistent mountpoint '
+                            'due to undefined host environment variable: %s', source)
+                        del self.mountpoints[k]
+                        continue
+                    else:
+                        raise ChrootMountError(
+                            'cannot mount undefined environment variable: {}'.format(source))
                 self.log.debug('Expanding mountpoint "%s" to "%s"', source, src)
                 self.mountpoints[src] = opts
                 del self.mountpoints[k]
@@ -143,8 +150,6 @@ class Chroot(SplitExec):
             raise ChrootMountError('Attempted to run mount method without running unshare method')
 
         for _, source, chrmount, opts in self.mounts:
-            if source.startswith('$'):
-                continue
             if dictbool(opts, 'optional') and not os.path.exists(source):
                 self.log.debug('Skipping optional and nonexistent mountpoint: %s', source)
                 continue
