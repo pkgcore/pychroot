@@ -31,6 +31,9 @@ argparser.add_argument(
 argparser.add_argument(
     '--hostname', type=str, help='specify the chroot hostname')
 argparser.add_argument(
+    '--skip-chdir', action='store_true',
+    help="do not change working directory to '/'")
+argparser.add_argument(
     '-B', '--bind', type=bindmount, action=mountpoints,
     metavar='SRC[:DEST]', help='specify custom bind mount')
 argparser.add_argument(
@@ -61,7 +64,7 @@ def main(args=None):
 
     try:
         with Chroot(opts.path, mountpoints=getattr(opts, 'mountpoints', None),
-                    hostname=opts.hostname):
+                    hostname=opts.hostname, skip_chdir=opts.skip_chdir):
             os.execvp(opts.command[0], opts.command)
     except EnvironmentError as e:
         if (e.errno == errno.ENOENT):

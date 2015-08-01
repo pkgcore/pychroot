@@ -42,7 +42,7 @@ class Chroot(SplitExec):
         '/etc/resolv.conf': {},
     }
 
-    def __init__(self, path, log=None, mountpoints=None, hostname=None):
+    def __init__(self, path, log=None, mountpoints=None, hostname=None, skip_chdir=False):
         self.log = getlogger(log, __name__)
 
         # TODO: capabilities check as well?
@@ -58,6 +58,7 @@ class Chroot(SplitExec):
         super(Chroot, self).__init__()
         self.path = os.path.abspath(path)
         self.hostname = hostname
+        self.skip_chdir = skip_chdir
         self.mountpoints = self.default_mounts.copy()
         self.mountpoints.update(mountpoints if mountpoints else {})
 
@@ -99,7 +100,8 @@ class Chroot(SplitExec):
         simple_unshare(pid=True, hostname=self.hostname)
         self.mount()
         os.chroot(self.path)
-        os.chdir('/')
+        if not self.skip_chdir:
+            os.chdir('/')
 
     def cleanup(self):
         # remove mount points that were dynamically created
