@@ -125,8 +125,9 @@ class Chroot(SplitExec):
             # don't fail if leaf directories aren't empty when trying to remove them
             except OSError:
                 pass
-            except:
-                raise ChrootMountError('Failed to remove chroot mount point: {}'.format(chrmount))
+            except Exception as e:
+                raise ChrootMountError(
+                    "failed to remove chroot mount point '{}'".format(chrmount), getattr(e, 'errno', None))
 
     def unshare(self):
         """
@@ -147,7 +148,7 @@ class Chroot(SplitExec):
         This _must_ be run after unshare.
         """
         if not self.__unshared:
-            raise ChrootMountError('Attempted to run mount method without running unshare method')
+            raise ChrootMountError('attempted to run mount method without running unshare method')
 
         for _, source, chrmount, opts in self.mounts:
             if dictbool(opts, 'optional') and not os.path.exists(source):
