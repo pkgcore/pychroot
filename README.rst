@@ -29,7 +29,7 @@ a similar fashion to chroot; however, it also performs the bind mounts
 previously mentioned so the environment is usable. In addition, pychroot
 supports specifying custom bind mounts, for example::
 
-    sudo pychroot -R /home/user ~/chroot
+    pychroot -R /home/user ~/chroot
 
 will recursively bind mount the user's home directory at the same location
 inside the chroot directory in addition to the standard bind mounts. See
