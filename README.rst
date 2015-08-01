@@ -51,11 +51,12 @@ following won't work::
     from pychroot import Chroot
 
     with Chroot('/path/to/chroot'):
-        a = 42
-    print(a)
+        answer = 42
+    print(answer)
 
-In this case, a NameError exception will be raised unless *a* was previously
-defined. This will probably be fixed to some extent in a future release.
+In this case, a NameError exception will be raised unless the variable *answer*
+was previously defined. This will probably be fixed to some extent in a future
+release.
 
 Requirements
 ============
