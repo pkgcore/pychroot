@@ -24,7 +24,7 @@ class mountpoints(argparse.Action):
 
 
 argparser = argparse.ArgumentParser(
-    description='an extended chroot equivalent')
+    description=__doc__.split('\n', 1)[0])
 argparser.add_argument('path', help='path to newroot')
 argparser.add_argument(
     'command', nargs=argparse.REMAINDER, help='optional command to run')
