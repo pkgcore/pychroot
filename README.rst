@@ -64,8 +64,19 @@ Python versions 2.7, 3.3, 3.4 are supported. Note however, that pychroot is
 quite Linux specific due to the use of namespaces via the `snakeoil`_ library
 which also require proper kernel support.
 
-Issues
-======
+Installing
+==========
+
+In a virtualenv or elsewhere via pip::
+
+    pip install pychroot
+
+From the repo manually::
+
+    python setup.py install
+
+Bugs
+====
 
 Please create an issue in the `issue tracker`_.
 
@@ -81,19 +92,11 @@ which is also integrated into setup.py, run via::
     python setup.py test
 
 Also, tests for all supported python versions can be run together or
-individually via tox. Note that mock_ is required for tests if you're using
-anything less than python 3.3.
+individually via::
 
-Installing
-==========
+    tox
 
-via pip::
-
-    pip install pychroot
-
-manually::
-
-    python setup.py install
+Note that mock_ is required for testing with anything less than python 3.3.
 
 
 .. _`issue tracker`: https://github.com/pkgcore/pychroot/issues
