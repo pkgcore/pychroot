@@ -35,12 +35,12 @@ will recursively bind mount the user's home directory at the same location
 inside the chroot directory in addition to the standard bind mounts. See
 pychroot's help output for more options.
 
-Notes
-=====
+Implementation details
+======================
 
-Namespaces are used by the context manager to segregate the chroot instance
-from the host system. By default, new mount, UTS, IPC, and pid namespaces are
-used. This allows for simplified handling of the teardown phase for the chroot
+Namespaces are used by the context manager to isolate the chroot instance from
+the host system. By default, new mount, UTS, IPC, and pid namespaces are used.
+This also allows for simplified handling of the teardown phase for the chroot
 environments.
 
 One quirk of note is that currently local variables are not propagated back
@@ -62,7 +62,16 @@ Requirements
 
 Python versions 2.7, 3.3, 3.4 are supported. Note however, that pychroot is
 quite Linux specific due to the use of namespaces via the `snakeoil`_ library
-which also require proper kernel support.
+which also require proper kernel support. Specifically for the kernel you
+should make sure the following are enabled in your kernel config to have full
+namespace support::
+
+    CONFIG_NAMESPACES=y
+    CONFIG_UTS_NS=y
+    CONFIG_IPC_NS=y
+    CONFIG_USER_NS=y
+    CONFIG_PID_NS=y
+    CONFIG_NET_NS=y
 
 Installing
 ==========
