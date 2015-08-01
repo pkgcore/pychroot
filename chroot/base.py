@@ -1,10 +1,11 @@
+import errno
 import os
 import sys
 
 if sys.hexversion >= 0x03030000:
     from socket import sethostname  # pylint: disable=no-name-in-module
 
-from chroot.exceptions import ChrootError, ChrootMountError, MountError
+from chroot.exceptions import ChrootError, ChrootMountError
 from chroot.utils import bind, getlogger, dictbool
 
 from snakeoil.contextlib import SplitExec
@@ -48,16 +49,17 @@ class Chroot(SplitExec):
         # TODO: capabilities check as well?
         # see http://marc.info/?l=python-dev&m=116406900432743
         if os.geteuid() != 0:
-            raise ChrootError('Must have root permissions to use chroot')
+            raise ChrootError(
+                "cannot change root directory to '{}'".format(path), errno.EPERM)
         elif hostname is not None and not isinstance(hostname, str):
             raise ChrootError('Hostname parameter passed a non-string object')
 
+        if not os.path.isdir(os.path.abspath(path)):
+            raise ChrootError(
+                "cannot change root directory to '{}'".format(path), errno.ENOTDIR)
+
         super(Chroot, self).__init__()
         self.__unshared = False
-
-        if not os.path.exists(os.path.abspath(path)):
-            raise ChrootError("nonexistent root directory: '{}'".format(path))
-
         self.path = os.path.abspath(path)
         self.mountpoints = self.default_mounts.copy()
         self.mountpoints.update(mountpoints if mountpoints else {})
@@ -146,7 +148,4 @@ class Chroot(SplitExec):
             if dictbool(opts, 'optional') and not os.path.exists(source):
                 self.log.debug('Skipping optional and nonexistent mountpoint: %s', source)
                 continue
-            try:
-                bind(src=source, dest=chrmount, chroot=self.path, log=self.log, **opts)
-            except MountError as e:
-                raise ChrootMountError(e)
+            bind(src=source, dest=chrmount, chroot=self.path, log=self.log, **opts)

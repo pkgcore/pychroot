@@ -5,7 +5,7 @@ import os
 import sys
 
 from chroot.base import Chroot
-from chroot.exceptions import ChrootError, ChrootMountError
+from chroot.exceptions import ChrootError
 
 
 def bindmount(s, recursive=False, readonly=False):
@@ -63,5 +63,5 @@ def main(args=None):
                 "{}: failed to run command '{}': {}".format(
                 os.path.basename(sys.argv[0]), opts.command[0], e.strerror))
         raise
-    except (ChrootError, ChrootMountError, KeyboardInterrupt) as e:
+    except ChrootError as e:
         raise SystemExit('{}: {}'.format(os.path.basename(sys.argv[0]), str(e)))

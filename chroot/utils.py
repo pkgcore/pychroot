@@ -6,7 +6,7 @@ import logging
 import operator
 import os
 
-from chroot.exceptions import MountError
+from chroot.exceptions import ChrootMountError
 
 from snakeoil.fileutils import touch
 from snakeoil.osutils.mount import mount, MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY
@@ -87,9 +87,9 @@ def bind(src, dest, chroot, create=False, log=None, readonly=False,
             touch(dest)
 
     if not os.path.exists(src) and src not in fstypes:
-        raise MountError('Attempt to bind mount nonexistent source path "{}"'.format(src))
+        raise ChrootMountError("cannot bind mount from '{}'".format(src), errno.ENOENT)
     elif not os.path.exists(dest):
-        raise MountError('Attempt to bind mount on nonexistent path "{}"'.format(dest))
+        raise ChrootMountError("cannot bind mount to '{}'".format(dest), errno.ENOENT)
 
     if src in fstypes:
         fstype = src
@@ -111,5 +111,5 @@ def bind(src, dest, chroot, create=False, log=None, readonly=False,
                   flags=reduce(operator.or_, mount_flags, 0),
                   data=','.join(mount_options))
     except OSError as e:
-        raise MountError(
-            'Failed mounting: mount -t %s %s %s: %s' % (fstype, src, dest, e.strerror))
+        raise ChrootMountError(
+            'Failed mounting: mount -t {} {} {}'.format(fstype, src, dest), e.errno)
