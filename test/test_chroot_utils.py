@@ -12,8 +12,8 @@ except ImportError:
 from pytest import raises
 from snakeoil.osutils.mount import MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY
 
-from chroot.utils import dictbool, getlogger, bind
-from chroot.exceptions import ChrootMountError
+from pychroot.utils import dictbool, getlogger, bind
+from pychroot.exceptions import ChrootMountError
 
 
 def test_dictbool():
@@ -32,12 +32,12 @@ def test_bind():
         bind('/nonexistent/src/path', '/randomdir', '/chroot/path')
     with raises(ChrootMountError):
         bind('tmpfs', '/nonexistent/dest/path', '/chroot/path')
-    with mock.patch('chroot.utils.mount', side_effect=OSError):
+    with mock.patch('pychroot.utils.mount', side_effect=OSError):
         with raises(ChrootMountError):
             bind('proc', '/root', '/chroot/path')
 
     # create
-    with mock.patch('chroot.utils.mount') as mount, \
+    with mock.patch('pychroot.utils.mount') as mount, \
             mock.patch('os.path.isdir') as isdir, \
             mock.patch('os.makedirs') as makedirs:
 

@@ -14,7 +14,7 @@ Usage
 
 In its simplest form, the library can be used similar to the following::
 
-    from chroot import Chroot
+    from pychroot import Chroot
 
     with Chroot('/path/to/chroot'):
         code that will be run
@@ -48,7 +48,7 @@ from the chroot context to the main context due to the usage of separate
 processes running the contexts. This means that something similar to the
 following won't work::
 
-    from chroot import Chroot
+    from pychroot import Chroot
 
     with Chroot('/path/to/chroot'):
         a = 42

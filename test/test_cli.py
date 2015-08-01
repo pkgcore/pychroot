@@ -10,7 +10,7 @@ except ImportError:
 import pytest
 from pytest import raises
 
-from chroot import cli
+from pychroot import cli
 
 
 def test_arg_parsing():
@@ -56,9 +56,9 @@ def test_cli():
             mock.patch('os.chroot') as chroot, \
             mock.patch('os._exit') as exit, \
             mock.patch('os.waitpid') as waitpid, \
-            mock.patch('chroot.utils.mount') as mount, \
+            mock.patch('pychroot.utils.mount') as mount, \
             mock.patch('os.execvp') as execvp, \
-            mock.patch('chroot.base.simple_unshare'):
+            mock.patch('pychroot.base.simple_unshare'):
 
         # no args
         with raises(SystemExit):
@@ -68,7 +68,7 @@ def test_cli():
         with raises(SystemExit):
             cli.main(['nonexistent-dir'])
 
-    with mock.patch('chroot.cli.Chroot'), \
+    with mock.patch('pychroot.cli.Chroot'), \
             mock.patch('os.execvp') as execvp:
 
         chroot = tempfile.mkdtemp()

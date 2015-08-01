@@ -6,7 +6,7 @@ import re
 import subprocess
 import sys
 
-from setuptools import setup, Command
+from setuptools import setup, Command, find_packages
 
 
 class PyTest(Command):
@@ -41,7 +41,7 @@ class PyLint(Command):
         cli_options = ['-E'] if self.errorsonly else []
         cli_options.append('--output-format={0}'.format(self.format))
         errno = subprocess.call([sys.executable, '-m', 'pylint', '--rcfile={}'.format(rcfile), '--output-format=colorized'] +
-                                cli_options + ['chroot'] + standaloneModules)
+                                cli_options + ['pychroot'] + standaloneModules)
         raise SystemExit(errno)
 
 test_requirements = ['pytest']
@@ -49,7 +49,7 @@ if sys.hexversion < 0x03030000:
     test_requirements.append('mock')
 
 version = ''
-with open('chroot/__init__.py', 'r', encoding='utf-8') as f:
+with open('pychroot/__init__.py', 'r', encoding='utf-8') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
                         f.read(), re.MULTILINE).group(1)
 
@@ -64,14 +64,14 @@ with open('NEWS.rst', 'r', encoding='utf-8') as f:
 setup(
     name='pychroot',
     version=version,
-    description='a python library that simplifies chroot handling',
+    description='a python library and cli tool that simplify chroot handling',
     long_description=readme + '\n\n' + news,
     author='Tim Harder',
     author_email='radhermit@gmail.com',
     url='https://github.com/pkgcore/pychroot',
     license='BSD',
-    packages=['chroot'],
-    entry_points={'console_scripts': ['pychroot = chroot.cli:main']},
+    packages=find_packages(),
+    entry_points={'console_scripts': ['pychroot = pychroot.cli:main']},
     install_requires=['snakeoil>=0.6.5'],
     tests_require=test_requirements,
     use_2to3=True,

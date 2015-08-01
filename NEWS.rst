@@ -4,6 +4,9 @@ Release Notes
 pychroot 0.9.12 (2015-0?-??)
 ----------------------------
 
+- The main module was renamed from chroot to pychroot mostly for consistency to
+  match the project name and cli tool installed alongside it.
+
 - Use $SHELL from the environment for the pychroot script to mirror chroot's
   behavior.
 

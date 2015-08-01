@@ -2,4 +2,4 @@
 
 __version__ = '0.9.12'
 
-from chroot.base import Chroot
+from pychroot.base import Chroot

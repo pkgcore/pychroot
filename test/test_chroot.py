@@ -8,21 +8,21 @@ except ImportError:
     import mock
 from pytest import raises
 
-from chroot.base import Chroot
-from chroot.exceptions import ChrootError, ChrootMountError
+from pychroot.base import Chroot
+from pychroot.exceptions import ChrootError, ChrootMountError
 
 
 def test_Chroot():
     if sys.hexversion >= 0x03030000:
-        patcher = mock.patch('chroot.base.sethostname')
+        patcher = mock.patch('pychroot.base.sethostname')
         sethostname = patcher.start()
 
     # testing Chroot.mount()
     with mock.patch('os.geteuid', return_value=0), \
-            mock.patch('chroot.base.bind') as bind, \
+            mock.patch('pychroot.base.bind') as bind, \
             mock.patch('os.path.exists') as exists, \
-            mock.patch('chroot.base.dictbool') as dictbool, \
-            mock.patch('chroot.base.simple_unshare'):
+            mock.patch('pychroot.base.dictbool') as dictbool, \
+            mock.patch('pychroot.base.simple_unshare'):
 
         c = Chroot('/')
         with raises(ChrootMountError):
@@ -43,8 +43,8 @@ def test_Chroot():
             mock.patch('os._exit') as exit, \
             mock.patch('os.path.exists') as exists, \
             mock.patch('os.waitpid') as waitpid, \
-            mock.patch('chroot.utils.mount') as mount, \
-            mock.patch('chroot.base.simple_unshare'):
+            mock.patch('pychroot.utils.mount') as mount, \
+            mock.patch('pychroot.base.simple_unshare'):
 
         geteuid.return_value = 1
 

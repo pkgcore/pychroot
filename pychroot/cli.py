@@ -4,8 +4,8 @@ from functools import partial
 import os
 import sys
 
-from chroot.base import Chroot
-from chroot.exceptions import ChrootError
+from pychroot.base import Chroot
+from pychroot.exceptions import ChrootError
 
 
 def bindmount(s, recursive=False, readonly=False):

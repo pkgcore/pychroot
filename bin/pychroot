@@ -8,9 +8,9 @@ sys.path.insert(1, osp.dirname(osp.dirname(osp.abspath(__file__))))
 
 if __name__ == '__main__':
     try:
-        from chroot import cli
+        from pychroot import cli
     except ImportError:
-        sys.stderr.write('Cannot import chroot!\n')
+        sys.stderr.write('Cannot import pychroot!\n')
         sys.exit(1)
 
     cli.main()

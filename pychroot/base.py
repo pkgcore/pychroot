@@ -5,8 +5,8 @@ import sys
 if sys.hexversion >= 0x03030000:
     from socket import sethostname  # pylint: disable=no-name-in-module
 
-from chroot.exceptions import ChrootError, ChrootMountError
-from chroot.utils import bind, getlogger, dictbool
+from pychroot.exceptions import ChrootError, ChrootMountError
+from pychroot.utils import bind, getlogger, dictbool
 
 from snakeoil.contextlib import SplitExec
 from snakeoil.namespaces import simple_unshare
