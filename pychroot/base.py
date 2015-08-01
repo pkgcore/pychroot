@@ -1,9 +1,7 @@
 import errno
 import os
+import socket
 import sys
-
-if sys.hexversion >= 0x03030000:
-    from socket import sethostname  # pylint: disable=no-name-in-module
 
 from pychroot.exceptions import ChrootError, ChrootMountError
 from pychroot.utils import bind, getlogger, dictbool
@@ -94,7 +92,7 @@ class Chroot(SplitExec):
             if sys.hexversion < 0x03030000:
                 self.log.warn('Unable to set hostname on Python < 3.3')
         else:
-            self.hostname = os.path.basename(self.path)
+            self.hostname = socket.gethostname()
 
     @property
     def mounts(self):
@@ -138,7 +136,7 @@ class Chroot(SplitExec):
 
         # set the hostname in the chroot process to hostname for the chroot
         if sys.hexversion >= 0x03030000:
-            sethostname(self.hostname)
+            socket.sethostname(self.hostname)
 
         self.__unshared = True
 
