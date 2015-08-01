@@ -27,7 +27,7 @@ def test_arg_parsing():
         opts = cli.parse_args(['dir'])
         assert opts.path == 'dir'
         assert opts.command == ['shell', '-i']
-        assert 'mountpoints' not in opts
+        assert opts.mountpoints is None
 
     # default shell when $SHELL isn't defined in the env
     with mock.patch.dict('os.environ', {}, clear=True):

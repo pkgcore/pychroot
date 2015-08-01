@@ -55,6 +55,9 @@ def parse_args(args):
     if not opts.command:
         opts.command = [os.getenv('SHELL', '/bin/sh'), '-i']
 
+    if not hasattr(opts, 'mountpoints'):
+        opts.mountpoints = None
+
     return opts
 
 
@@ -63,7 +66,7 @@ def main(args=None):
     opts = parse_args(args)
 
     try:
-        with Chroot(opts.path, mountpoints=getattr(opts, 'mountpoints', None),
+        with Chroot(opts.path, mountpoints=opts.mountpoints,
                     hostname=opts.hostname, skip_chdir=opts.skip_chdir):
             os.execvp(opts.command[0], opts.command)
     except EnvironmentError as e:
