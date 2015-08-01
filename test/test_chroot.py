@@ -10,7 +10,6 @@ from pytest import raises
 
 from chroot.base import Chroot
 from chroot.exceptions import ChrootError, ChrootMountError
-from chroot.utils import MountError
 
 
 def test_Chroot():
@@ -23,19 +22,13 @@ def test_Chroot():
             mock.patch('chroot.base.bind') as bind, \
             mock.patch('os.path.exists') as exists, \
             mock.patch('chroot.base.dictbool') as dictbool, \
-            mock.patch('chroot.base.mount') as mount, \
             mock.patch('chroot.base.simple_unshare'):
 
         c = Chroot('/')
         with raises(ChrootMountError):
             c.mount()
 
-        bind.side_effect = MountError('fake exception')
         c.unshare()
-        with raises(ChrootMountError):
-            c.mount()
-
-        bind.reset_mock()
         bind.side_effect = None
         exists.return_value = False
         dictbool.return_value = True
@@ -74,6 +67,13 @@ def test_Chroot():
         # $FAKEPATH not defined in environment
         with raises(ChrootMountError):
             Chroot('/', mountpoints={'$FAKEVAR': {}})
+
+        # optional, undefined variable mounts get dropped
+        c = Chroot('/', mountpoints={
+            '$FAKEVAR': {'optional': True},
+            '/home/user': {}})
+        assert '$FAKEVAR' not in c.mounts
+        assert len(list(c.mounts)) - len(c.default_mounts) == 1
 
         with mock.patch('os.getenv', return_value='/fake/src/path'):
             Chroot('/', mountpoints={'$FAKEVAR': {}})

@@ -10,9 +10,10 @@ except ImportError:
     import mock
 
 from pytest import raises
-from snakeoil.osutils import MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY
+from snakeoil.osutils.mount import MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY
 
-from chroot.utils import dictbool, getlogger, bind, MountError
+from chroot.utils import dictbool, getlogger, bind
+from chroot.exceptions import ChrootMountError
 
 
 def test_dictbool():
@@ -27,12 +28,12 @@ def test_getlogger():
 
 
 def test_bind():
-    with raises(MountError):
+    with raises(ChrootMountError):
         bind('/nonexistent/src/path', '/randomdir', '/chroot/path')
-    with raises(MountError):
+    with raises(ChrootMountError):
         bind('tmpfs', '/nonexistent/dest/path', '/chroot/path')
     with mock.patch('chroot.utils.mount', side_effect=OSError):
-        with raises(MountError):
+        with raises(ChrootMountError):
             bind('proc', '/root', '/chroot/path')
 
     # create
@@ -63,8 +64,8 @@ def test_bind():
             makedirs.reset_mock()
 
             # broken symlink
-            # usually this would raise MountError but we're catching the makedirs call
-            with raises(MountError):
+            # usually this would raise ChrootMountError but we're catching the makedirs call
+            with raises(ChrootMountError):
                 os.symlink('/nonexistent', os.path.join(chroot, 'broken'))
                 bind(src, os.path.join(chroot, 'broken'), chroot, create=False)
                 makedirs.assert_called_once_with(os.path.join(chroot, 'nonexistent'))
@@ -101,7 +102,7 @@ def test_bind():
             call2 = mock.call(source=src, target=dest, fstype=None, flags=(MS_BIND | MS_REMOUNT | MS_RDONLY), data='')
             mount.assert_has_calls([call1, call2])
 
-            #with raises(MountError):
+            #with raises(ChrootMountError):
                 #bind('/', '/root', readonly=True)
         finally:
             shutil.rmtree(src)
