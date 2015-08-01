@@ -4,11 +4,10 @@
 pychroot
 ========
 
-pychroot is a python library a cli tool that simplify chroot handling.
-Specifically, the library provides a **Chroot** context manager that allows for
-more pythonic methods for running code in or controlling access to chroots
-while the **pychroot** utility works much like an extended chroot(1) on the
-command line.
+pychroot is a python library and cli tool that simplify chroot handling.
+Specifically, the library provides a **Chroot** context manager that enables
+more pythonic methods for running code in chroots while the **pychroot**
+utility works much like an extended chroot command in the terminal.
 
 Usage
 =====
