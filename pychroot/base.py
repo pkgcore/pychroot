@@ -25,8 +25,7 @@ class Chroot(SplitExec):
     :param mountpoints: A dictionary defining the mountpoints to use. These can
         override any of the defaults or add extra mountpoints
     :type mountpoints: dict
-    :param hostname: The hostname to use in the chroot. If left blank then the
-        basename of the path is used.
+    :param hostname: The hostname for the chroot, defaults to the system hostname
     :type hostname: str
     """
 
@@ -49,16 +48,14 @@ class Chroot(SplitExec):
         if os.geteuid() != 0:
             raise ChrootError(
                 "cannot change root directory to '{}'".format(path), errno.EPERM)
-        elif hostname is not None and not isinstance(hostname, str):
-            raise ChrootError('Hostname parameter passed a non-string object')
 
         if not os.path.isdir(os.path.abspath(path)):
             raise ChrootError(
                 "cannot change root directory to '{}'".format(path), errno.ENOTDIR)
 
         super(Chroot, self).__init__()
-        self.__unshared = False
         self.path = os.path.abspath(path)
+        self.hostname = hostname
         self.mountpoints = self.default_mounts.copy()
         self.mountpoints.update(mountpoints if mountpoints else {})
 
@@ -87,13 +84,6 @@ class Chroot(SplitExec):
             if 'optional' not in opts and not os.path.exists(chrmount):
                 self.mountpoints[k]['create'] = True
 
-        if hostname is not None:
-            self.hostname = hostname
-            if sys.hexversion < 0x03030000:
-                self.log.warn('Unable to set hostname on Python < 3.3')
-        else:
-            self.hostname = socket.gethostname()
-
     @property
     def mounts(self):
         for k, options in self.mountpoints.items():
@@ -104,7 +94,7 @@ class Chroot(SplitExec):
             yield k, source, dest, options
 
     def child_setup(self):
-        self.unshare()
+        simple_unshare(pid=True, hostname=self.hostname)
         self.mount()
         os.chroot(self.path)
         os.chdir('/')
@@ -127,27 +117,11 @@ class Chroot(SplitExec):
                 raise ChrootMountError(
                     "failed to remove chroot mount point '{}'".format(chrmount), getattr(e, 'errno', None))
 
-    def unshare(self):
-        """
-        Use Linux namespaces to add the current process to a new UTS (hostname)
-        namespace, new mount namespace and new IPC namespace.
-        """
-        simple_unshare(pid=True)
-
-        # set the hostname in the chroot process to hostname for the chroot
-        if sys.hexversion >= 0x03030000:
-            socket.sethostname(self.hostname)
-
-        self.__unshared = True
-
     def mount(self):
         """Do the bind mounts for this chroot object.
 
-        This _must_ be run after unshare.
+        This _must_ be run after creating a new mount namespace.
         """
-        if not self.__unshared:
-            raise ChrootMountError('attempted to run mount method without running unshare method')
-
         for _, source, chrmount, opts in self.mounts:
             if dictbool(opts, 'optional') and not os.path.exists(source):
                 self.log.debug('Skipping optional and nonexistent mountpoint: %s', source)

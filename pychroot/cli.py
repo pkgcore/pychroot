@@ -28,6 +28,8 @@ def parse_args(args):
     parser.add_argument(
         'command', nargs=argparse.REMAINDER, help='optional command to run')
     parser.add_argument(
+        '--hostname', type=str, help='specify the chroot hostname')
+    parser.add_argument(
         '-B', '--bind', type=bindmount, action=mountpoints,
         metavar='SRC[:DEST]', help='specify custom bind mount')
     parser.add_argument(
@@ -55,7 +57,8 @@ def main(args=None):
     opts = parse_args(args)
 
     try:
-        with Chroot(opts.path, mountpoints=getattr(opts, 'mountpoints', None)):
+        with Chroot(opts.path, mountpoints=getattr(opts, 'mountpoints', None),
+                    hostname=opts.hostname):
             os.execvp(opts.command[0], opts.command)
     except EnvironmentError as e:
         if (e.errno == errno.ENOENT):

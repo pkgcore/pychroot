@@ -13,10 +13,6 @@ from pychroot.exceptions import ChrootError, ChrootMountError
 
 
 def test_Chroot():
-    if sys.hexversion >= 0x03030000:
-        patcher = mock.patch('pychroot.base.sethostname')
-        sethostname = patcher.start()
-
     # testing Chroot.mount()
     with mock.patch('os.geteuid', return_value=0), \
             mock.patch('pychroot.base.bind') as bind, \
@@ -25,10 +21,6 @@ def test_Chroot():
             mock.patch('pychroot.base.simple_unshare'):
 
         c = Chroot('/')
-        with raises(ChrootMountError):
-            c.mount()
-
-        c.unshare()
         bind.side_effect = None
         exists.return_value = False
         dictbool.return_value = True
@@ -53,10 +45,6 @@ def test_Chroot():
             chroot = Chroot('/')
 
         geteuid.return_value = 0
-
-        # invalid hostname
-        with raises(ChrootError):
-            Chroot('/', hostname=True)
 
         # bad path
         exists.return_value = False
