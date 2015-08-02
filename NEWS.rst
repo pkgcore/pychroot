@@ -7,6 +7,13 @@ pychroot 0.9.12 (2015-0?-??)
 - The main module was renamed from chroot to pychroot mostly for consistency to
   match the project name and cli tool installed alongside it.
 
+- Add a man page for the pychroot cli tool.
+
+- Add an option to skip changing to the newroot directory after chrooting. This
+  is similar to the option for chroot(1) but also allows skipping the directory
+  change when the new root isn't '/'. In other words, you can use a chroot
+  environment against the host's rootfs.
+
 - Use $SHELL from the environment for the pychroot script to mirror chroot's
   behavior.
 
