@@ -2,7 +2,7 @@
 pychroot
 ========
 
-.. include:: pychroot/main_synopsis.rst
+.. include:: ../generated/pychroot/main_synopsis.rst
 
 Description
 ===========
@@ -10,7 +10,7 @@ Description
 pychroot is an extended **chroot(1)** equivalent that also provides support for
 automatically handling bind mounts.
 
-.. include:: pychroot/main_options.rst
+.. include:: ../generated/pychroot/main_options.rst
 
 Reporting Bugs
 ==============

@@ -42,7 +42,6 @@ def generate_docs():
 
     # generate man page option docs
     for module, script in generated_man_pages:
-        os.symlink(os.path.join(os.pardir, 'generated', script), os.path.join('man', script))
         ManConverter.regen_if_needed('generated', module, out_name=script)
 
     # generate API docs

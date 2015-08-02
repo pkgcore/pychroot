@@ -131,9 +131,6 @@ text:
 
 man:
 	$(SPHINXBUILD) -b man $(ALLSPHINXOPTS) $(BUILDDIR)/man
-	@for file in man/*; do \
-		[ -L "$${file}" ] && rm -f "$${file}" || continue; \
-	done
 	@echo
 	@echo "Build finished. The manual pages are in $(BUILDDIR)/man."
 
