@@ -6,6 +6,8 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
+PREFIX        = /usr/local
+MAN_PREFIX    = $(PREFIX)/share/man
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -134,6 +136,12 @@ man:
 	done
 	@echo
 	@echo "Build finished. The manual pages are in $(BUILDDIR)/man."
+
+install_man:
+	@for file in $(BUILDDIR)/man/*; do \
+		install -d -m 755 "$(DESTDIR)$(MAN_PREFIX)/man$$(echo $$file | sed 's/.*\.//')"; \
+		install -m 644 "$${file}" "$(DESTDIR)$(MAN_PREFIX)/man$$(echo $$file | sed 's/.*\.//')"; \
+	done
 
 texinfo:
 	$(SPHINXBUILD) -b texinfo $(ALLSPHINXOPTS) $(BUILDDIR)/texinfo
