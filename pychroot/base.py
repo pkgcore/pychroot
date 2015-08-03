@@ -1,13 +1,11 @@
 import errno
 import os
-import socket
-import sys
 
 from pychroot.exceptions import ChrootError, ChrootMountError
 from pychroot.utils import bind, getlogger, dictbool
 
 from snakeoil.contextlib import SplitExec
-from snakeoil.namespaces import simple_unshare
+from snakeoil.process.namespaces import simple_unshare
 
 
 class Chroot(SplitExec):
