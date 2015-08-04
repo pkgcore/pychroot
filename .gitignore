@@ -13,6 +13,7 @@ eggs
 # docs
 /doc/_build
 /doc/api
+/doc/generated
 
 # Unit test / coverage reports
 htmlcov
