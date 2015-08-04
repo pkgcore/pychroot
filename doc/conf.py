@@ -26,7 +26,7 @@ sys.path.insert(1, os.path.abspath('.'))
 sys.path.insert(2, os.path.abspath('..'))
 
 from pychroot import __version__
-from generate_man_rsts import ManConverter
+from snakeoil.dist.generate_man_rsts import ManConverter
 
 
 def generate_docs():
