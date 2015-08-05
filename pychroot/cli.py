@@ -11,6 +11,8 @@ import sys
 from pychroot.base import Chroot
 from pychroot.exceptions import ChrootError
 
+from snakeoil.version import get_version
+
 
 def bindmount(s, recursive=False, readonly=False):
     opts = {'recursive': recursive, 'readonly': readonly}
@@ -27,6 +29,8 @@ class mountpoints(argparse.Action):
 
 argparser = argparse.ArgumentParser(
     description=__doc__.split('\n', 1)[0])
+argparser.add_argument(
+    '--version', action='version', version=get_version('pychroot', __file__))
 argparser.add_argument('path', help='path to newroot')
 argparser.add_argument(
     'command', nargs=argparse.REMAINDER, help='optional command to run')
