@@ -80,7 +80,7 @@ class Chroot(SplitExec):
 
     @property
     def mounts(self):
-        for k, options in list(self.mountpoints.items()):
+        for k, options in list(self.mountpoints.iteritems()):
             source, _, dest = k.partition(':')
             if not dest:
                 dest = source
