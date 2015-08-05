@@ -8,6 +8,8 @@ import sys
 
 from setuptools import setup, Command, find_packages
 
+from snakeoil.dist.distutils_extensions import build_py3
+
 
 class PyTest(Command):
     user_options = [('match=', 'k', 'Run only tests that match the provided expressions')]
@@ -44,8 +46,10 @@ class PyLint(Command):
                                 cli_options + ['pychroot'] + standaloneModules)
         raise SystemExit(errno)
 
+setup_requirements = ['snakeoil>=0.6.5']
 test_requirements = ['pytest']
 if sys.hexversion < 0x03030000:
+    setup_requirements.append('3to2')
     test_requirements.append('mock')
 
 version = ''
@@ -72,12 +76,15 @@ setup(
     license='BSD',
     packages=find_packages(),
     entry_points={'console_scripts': ['pychroot = pychroot.cli:main']},
-    setup_requires=['snakeoil>=0.6.5'],
     install_requires=['snakeoil>=0.6.5'],
+    setup_requires=setup_requirements,
     tests_require=test_requirements,
-    use_2to3=True,
     platforms='Posix',
-    cmdclass={'test': PyTest, 'lint': PyLint},
+    cmdclass={
+        'build_py': build_py3,
+        'test': PyTest,
+        'lint': PyLint,
+    },
     classifiers=(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
