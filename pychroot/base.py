@@ -42,12 +42,6 @@ class Chroot(SplitExec):
     def __init__(self, path, log=None, mountpoints=None, hostname=None, skip_chdir=False):
         self.log = getlogger(log, __name__)
 
-        # TODO: capabilities check as well?
-        # see http://marc.info/?l=python-dev&m=116406900432743
-        if os.geteuid() != 0:
-            raise ChrootError(
-                "cannot change root directory to '{}'".format(path), errno.EPERM)
-
         if not os.path.isdir(os.path.abspath(path)):
             raise ChrootError(
                 "cannot change root directory to '{}'".format(path), errno.ENOTDIR)
@@ -94,7 +88,17 @@ class Chroot(SplitExec):
             yield k, source, dest, options
 
     def child_setup(self):
-        simple_unshare(pid=True, hostname=self.hostname)
+        kwargs = {}
+        if os.getuid() != 0:
+            # Enable a user namespace if we're not root. Note that this also
+            # requires a network namespace in order to mount sysfs and use
+            # network devices; however, we currently only provide a basic
+            # loopback interface if iproute2 is installed in the chroot so
+            # regular connections out of the namespaced environment won't work
+            # by default.
+            kwargs.update({'user': True, 'net': True})
+
+        simple_unshare(pid=True, hostname=self.hostname, **kwargs)
         self.mount()
         os.chroot(self.path)
         if not self.skip_chdir:

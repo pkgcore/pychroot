@@ -9,6 +9,11 @@ pychroot 0.9.12 (2015-0?-??)
 
 - Add a man page for the pychroot cli tool.
 
+- Add user namespace support so you can chroot as a regular user. Note that
+  this also requires using a network namespace for which we only setup a
+  loopback interface (if iproute2 is installed in the chroot) so external
+  network access won't work by default in this situation.
+
 - Add an option to skip changing to the newroot directory after chrooting. This
   is similar to the option for chroot(1) but also allows skipping the directory
   change when the new root isn't '/'. In other words, you can use a chroot
