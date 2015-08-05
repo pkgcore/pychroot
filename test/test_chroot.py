@@ -1,8 +1,6 @@
 from __future__ import unicode_literals
 
 from itertools import chain, cycle
-import os
-import sys
 
 try:
     from unittest import mock
@@ -16,8 +14,7 @@ from pychroot.exceptions import ChrootError, ChrootMountError
 
 def test_Chroot():
     # testing Chroot.mount()
-    with mock.patch('os.geteuid', return_value=0), \
-            mock.patch('pychroot.base.bind') as bind, \
+    with mock.patch('pychroot.base.bind') as bind, \
             mock.patch('os.path.exists') as exists, \
             mock.patch('pychroot.base.dictbool') as dictbool, \
             mock.patch('pychroot.base.simple_unshare'):
@@ -29,8 +26,7 @@ def test_Chroot():
         c.mount()
         assert not bind.called
 
-    with mock.patch('os.geteuid') as geteuid, \
-            mock.patch('os.fork') as fork, \
+    with mock.patch('os.fork') as fork, \
             mock.patch('os.chroot') as chroot, \
             mock.patch('os.chdir') as chdir, \
             mock.patch('os.remove') as remove, \
@@ -39,14 +35,6 @@ def test_Chroot():
             mock.patch('os.waitpid') as waitpid, \
             mock.patch('pychroot.utils.mount') as mount, \
             mock.patch('pychroot.base.simple_unshare'):
-
-        geteuid.return_value = 1
-
-        # not running as root
-        with raises(ChrootError):
-            chroot = Chroot('/')
-
-        geteuid.return_value = 0
 
         # bad path
         exists.return_value = False
