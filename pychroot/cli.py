@@ -1,5 +1,7 @@
 """an extended chroot equivalent"""
 
+from __future__ import unicode_literals
+
 import argparse
 import errno
 from functools import partial

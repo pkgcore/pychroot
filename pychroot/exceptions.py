@@ -1,5 +1,7 @@
 """Various chroot-related exception classes"""
 
+from __future__ import unicode_literals
+
 import os
 
 
