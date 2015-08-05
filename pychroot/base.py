@@ -32,12 +32,9 @@ class Chroot(SplitExec):
     """
 
     default_mounts = {
-        '/dev': {
-            'recursive': True,
-            'readonly': True,
-        },
-        '/proc': {},
-        '/sys': {},
+        '/dev': {'recursive': True},
+        'proc:/proc': {},
+        'sysfs:/sys': {},
         'tmpfs:/dev/shm': {},
         '/etc/resolv.conf': {},
     }
