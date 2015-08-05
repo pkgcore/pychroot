@@ -39,9 +39,11 @@ Implementation details
 ======================
 
 Namespaces are used by the context manager to isolate the chroot instance from
-the host system. By default, new mount, UTS, IPC, and pid namespaces are used.
-This also allows for simplified handling of the teardown phase for the chroot
-environments.
+the host system and to simplify the teardown phase for the environments. By
+default, new mount, UTS, IPC, and pid namespaces are used.  In addition, if
+running as non-root, both user and network namespaces will be enabled as well
+so that the chrooting and mounting process will work without elevated
+permissions.
 
 One quirk of note is that currently local variables are not propagated back
 from the chroot context to the main context due to the usage of separate
