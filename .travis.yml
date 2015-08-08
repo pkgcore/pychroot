@@ -1,13 +1,19 @@
 language: python
 python:
-    - 2.7
-    - 3.3
-    - 3.4
+  - 2.7
+  - 3.3
+  - 3.4
+  - nightly
+matrix:
+  fast_finish: true
+  allow_failures:
+    - python: nightly
 sudo: false
-install: pip install 'tox<2' 'coveralls>0.5'
-script: tox -e py${TRAVIS_PYTHON_VERSION/\./}
+cache:
+  directories:
+    - $HOME/.cache/pip
+install: pip install 'tox<2' 'coveralls>=0.5'
+script: tox -e travis
 after_success:
-    # upload coverage data to coveralls.io
-    - pushd .tox/py${TRAVIS_PYTHON_VERSION/\./}/lib/python*/site-packages
-    - coveralls
-    - popd
+  # upload coverage data
+  - coveralls
