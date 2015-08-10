@@ -35,6 +35,13 @@ will recursively bind mount the user's home directory at the same location
 inside the chroot directory in addition to the standard bind mounts. See
 pychroot's help output for more options.
 
+When running on a system with a recent kernel (Linux 3.8 and on) and user
+namespaces enabled pychroot can be run by a regular user. Note that currently
+pychroot just maps the current user to root in the chroot environment. This
+means that recursively chown-ing the chroot directory to the user running
+pychroot should essentially allow that user to act as root in the pychroot
+environment.
+
 Implementation details
 ======================
 
@@ -65,9 +72,8 @@ Requirements
 
 Python versions 2.7, 3.3, 3.4 are supported. Note however, that pychroot is
 quite Linux specific due to the use of namespaces via the `snakeoil`_ library
-which also require proper kernel support. Specifically for the kernel you
-should make sure the following are enabled in your kernel config to have full
-namespace support::
+which also require proper kernel support. Specifically, the following kernel
+config options are required to be enabled for full namespace support::
 
     CONFIG_NAMESPACES=y
     CONFIG_UTS_NS=y
