@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-pychroot 0.9.12 (2015-0?-??)
+pychroot 0.9.12 (2015-08-10)
 ----------------------------
 
 - The main module was renamed from chroot to pychroot mostly for consistency to
