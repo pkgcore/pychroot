@@ -110,8 +110,8 @@ setup(
     license='BSD',
     packages=find_packages(),
     entry_points={'console_scripts': ['pychroot = pychroot.cli:main']},
-    install_requires=['snakeoil>=0.6.5'],
-    setup_requires=['snakeoil>=0.6.5'],
+    install_requires=['snakeoil>=0.6.6'],
+    setup_requires=['snakeoil>=0.6.6'],
     tests_require=test_requirements,
     platforms='Posix',
     cmdclass={
