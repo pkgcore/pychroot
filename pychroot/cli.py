@@ -11,6 +11,7 @@ import sys
 from pychroot.base import Chroot
 from pychroot.exceptions import ChrootError
 
+import snakeoil.cli
 from snakeoil.version import get_version
 
 
@@ -47,12 +48,16 @@ argparser.add_argument(
     action=mountpoints, metavar='SRC[:DEST]',
     help='specify custom recursive bind mount')
 
-# Readonly support and similar things should be made into mount arg
-# attributes once readonly, recursive bind mounts are supported on Linux.
 argparser.add_argument(
     '--ro', '--readonly', type=partial(bindmount, readonly=True),
     action=mountpoints, metavar='SRC[:DEST]',
-    help='specify custom readonly bind mount')
+    help='specify custom readonly bind mount',
+    docs="""
+        Readonly, recursive bind mounts aren't currently supported on Linux so
+        this has to be a standalone option for now. Once they are, support for
+        them and other mount attributes will be added as an extension to the
+        mount point argument syntax.
+    """)
 
 
 def parse_args(args):
