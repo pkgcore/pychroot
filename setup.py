@@ -8,7 +8,7 @@ import sys
 
 from setuptools import setup, Command, find_packages
 
-from snakeoil.dist import distutils_extensions as pkgdist
+import pkgdist
 
 
 class mysdist(pkgdist.sdist):

@@ -1,4 +1,4 @@
-include AUTHORS LICENSE *.rst
+include AUTHORS LICENSE *.py *.rst
 include tox.ini
 recursive-include bin *
 recursive-include doc *

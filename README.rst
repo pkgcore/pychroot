@@ -87,7 +87,6 @@ Installing
 
 In a virtualenv or elsewhere via pip::
 
-    pip install snakeoil
     pip install pychroot
 
 From the repo manually::
