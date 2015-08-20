@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+pychroot 0.9.13 (2015-0?-??)
+----------------------------
+
+- Add --no-mounts option to disable the default mounts for the command line
+  tool. This makes pychroot act similar to chroot.
+
+- Make pychroot pip-installable without requiring snakeoil to be manually
+  installed first.
+
+- Add lots of additional content to the pychroot utility man page.
+
 pychroot 0.9.12 (2015-08-10)
 ----------------------------
 
