@@ -34,7 +34,11 @@ argparser.add_argument(
     '--version', action='version', version=get_version('pychroot', __file__))
 argparser.add_argument('path', help='path to newroot')
 argparser.add_argument(
-    'command', nargs=argparse.REMAINDER, help='optional command to run')
+    'command', nargs=argparse.REMAINDER, help='optional command to run',
+    docs="""
+        Similar to chroot(1), if unspecified this defaults to $SHELL from the
+        host environment and if that's unset it executes /bin/sh.
+    """)
 argparser.add_argument(
     '--hostname', type=str, help='specify the chroot hostname',
     docs="""
@@ -52,7 +56,14 @@ argparser.add_argument(
     """)
 argparser.add_argument(
     '-B', '--bind', type=bindmount, action=mountpoints,
-    metavar='SRC[:DEST]', help='specify custom bind mount')
+    metavar='SRC[:DEST]', help='specify custom bind mount',
+    docs="""
+        In order to mount the same source to multiple destinations, use the
+        SRC:DEST syntax. For example, the following will bind mount '/srv/data'
+        to /srv/data and /home/user/data in the chroot::
+
+            pychroot -B /srv/data -B /srv/data:/home/user/data /path/to/chroot
+    """)
 argparser.add_argument(
     '-R', '--rbind', type=partial(bindmount, recursive=True),
     action=mountpoints, metavar='SRC[:DEST]',
