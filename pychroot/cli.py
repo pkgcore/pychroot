@@ -36,10 +36,20 @@ argparser.add_argument('path', help='path to newroot')
 argparser.add_argument(
     'command', nargs=argparse.REMAINDER, help='optional command to run')
 argparser.add_argument(
-    '--hostname', type=str, help='specify the chroot hostname')
+    '--hostname', type=str, help='specify the chroot hostname',
+    docs="""
+        In order to set the domain name as well, pass an FQDN instead of a
+        singular hostname.
+    """)
 argparser.add_argument(
     '--skip-chdir', action='store_true',
-    help="do not change working directory to '/'")
+    help="do not change working directory to '/'",
+    docs="""
+        Unlike chroot(1), this currently doesn't limit you to only using it
+        when the new root isn't '/'. In other words, you can use a new chroot
+        environment on the current host system rootfs with one caveat: any
+        absolute paths will use of the new rootfs.
+    """)
 argparser.add_argument(
     '-B', '--bind', type=bindmount, action=mountpoints,
     metavar='SRC[:DEST]', help='specify custom bind mount')
