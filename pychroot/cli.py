@@ -40,6 +40,13 @@ argparser.add_argument(
         host environment and if that's unset it executes /bin/sh.
     """)
 argparser.add_argument(
+    '--no-mounts', action='store_true',
+    help='disable the default bind mounts',
+    docs="""
+        Use this to obtain a standard chroot environment without any bind
+        mounts that you'd expect when using chroot(1).
+    """)
+argparser.add_argument(
     '--hostname', type=str, help='specify the chroot hostname',
     docs="""
         In order to set the domain name as well, pass an FQDN instead of a
@@ -89,6 +96,9 @@ def parse_args(args):
 
     if not hasattr(opts, 'mountpoints'):
         opts.mountpoints = None
+
+    if opts.no_mounts:
+        Chroot.default_mounts = {}
 
     return opts
 
