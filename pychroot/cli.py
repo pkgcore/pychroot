@@ -59,7 +59,7 @@ argparser.add_argument(
         Unlike chroot(1), this currently doesn't limit you to only using it
         when the new root isn't '/'. In other words, you can use a new chroot
         environment on the current host system rootfs with one caveat: any
-        absolute paths will use of the new rootfs.
+        absolute paths will use the new rootfs.
     """)
 argparser.add_argument(
     '-B', '--bind', type=bindmount, action=mountpoints,
