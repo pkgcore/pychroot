@@ -11,7 +11,7 @@ import sys
 from pychroot.base import Chroot
 from pychroot.exceptions import ChrootError
 
-import snakeoil.cli
+import snakeoil.cli  # needed for add_argument() docs kwargs
 from snakeoil.version import get_version
 
 
@@ -115,7 +115,7 @@ def main(args=None):
         if (e.errno == errno.ENOENT):
             raise SystemExit(
                 "{}: failed to run command '{}': {}".format(
-                os.path.basename(sys.argv[0]), opts.command[0], e.strerror))
+                    os.path.basename(sys.argv[0]), opts.command[0], e.strerror))
         raise
     except ChrootError as e:
         raise SystemExit('{}: {}'.format(os.path.basename(sys.argv[0]), str(e)))
