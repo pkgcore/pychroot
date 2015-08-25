@@ -1,5 +1,5 @@
 [run]
-source = chroot
+source = pychroot
 branch = True
 
 [report]
