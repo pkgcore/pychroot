@@ -6,7 +6,7 @@ import os
 from pychroot.exceptions import ChrootError, ChrootMountError
 from pychroot.utils import bind, getlogger, dictbool
 
-from snakeoil.context import SplitExec
+from snakeoil.contexts import SplitExec
 from snakeoil.process.namespaces import simple_unshare
 
 
