@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-pychroot 0.9.13 (2015-0?-??)
+pychroot 0.9.13 (2015-12-13)
 ----------------------------
 
 - Add --no-mounts option to disable the default mounts for the command line
