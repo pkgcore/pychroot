@@ -71,6 +71,8 @@ setup(
     platforms='Posix',
     cmdclass={
         'build_py': pkgdist.build_py,
+        'build_man': pkgdist.build_man,
+        'install_man': pkgdist.install_man,
         'sdist': pkgdist.sdist,
         'test': PyTest,
         'lint': PyLint,
