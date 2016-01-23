@@ -2,7 +2,6 @@
 
 from io import open
 import os
-import re
 import subprocess
 import sys
 
@@ -50,14 +49,6 @@ test_requirements = ['pytest']
 if sys.hexversion < 0x03030000:
     test_requirements.append('mock')
 
-version = ''
-with open('pychroot/__init__.py', 'r', encoding='utf-8') as f:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
-                        f.read(), re.MULTILINE).group(1)
-
-if not version:
-    raise RuntimeError('Cannot find version')
-
 with open('README.rst', 'r', encoding='utf-8') as f:
     readme = f.read()
 with open('NEWS.rst', 'r', encoding='utf-8') as f:
@@ -65,7 +56,7 @@ with open('NEWS.rst', 'r', encoding='utf-8') as f:
 
 setup(
     name='pychroot',
-    version=version,
+    version=pkgdist.version(),
     description='a python library and cli tool that simplify chroot handling',
     long_description=readme + '\n\n' + news,
     author='Tim Harder',
