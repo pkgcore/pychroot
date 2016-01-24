@@ -47,7 +47,7 @@ def find_project(repo_file):
 # determine the project we're being imported into
 PROJECT = find_project(inspect.stack(0)[1][1])
 # top level repo/tarball directory
-TOPDIR = os.path.dirname(inspect.stack(0)[1][1])
+TOPDIR = os.path.abspath(os.path.dirname(inspect.stack(0)[1][1]))
 
 
 def version(project=PROJECT):
@@ -103,20 +103,12 @@ class OptionalExtension(Extension):
 
 
 class sdist(dst_sdist.sdist):
-
-    """sdist command wrapper to generate version info file"""
+    """sdist command wrapper to bundle generated files for release."""
 
     package_namespace = PROJECT
 
-    user_options = dst_sdist.sdist.user_options + [
-        ('build-docs', None, 'build docs'),
-    ]
-
-    boolean_options = dst_sdist.sdist.boolean_options + ['build-docs']
-
     def initialize_options(self):
         dst_sdist.sdist.initialize_options(self)
-        self.build_docs = False
 
     def generate_verinfo(self, base_dir):
         """Generate project version module.
@@ -141,7 +133,7 @@ class sdist(dst_sdist.sdist):
         exist in a working tree.
         """
 
-        if self.build_docs:
+        if 'build_man' in self.distribution.cmdclass:
             self.run_command('build_man')
             import shutil
             shutil.copytree(os.path.join(os.getcwd(), "build/sphinx/man"),
@@ -314,12 +306,19 @@ class build_man(Command):
         pass
 
     def run(self):
-        # need to make sure we're using a built version since the man page
-        # generation process imports the script modules
+        # Use a built version for the man page generation process that imports
+        # script modules.
         build_py = self.distribution.get_command_obj('build_py')
         self.run_command('build_py')
         syspath = sys.path[:]
         sys.path.insert(0, os.path.abspath(build_py.build_lib))
+
+        # generate man page content for scripts we create
+        if 'build_scripts' in self.distribution.cmdclass:
+            from snakeoil.dist.generate_docs import generate_man
+            generate_man(PROJECT, TOPDIR)
+
+        # generate man pages
         build_sphinx = self.distribution.get_command_obj('build_sphinx')
         build_sphinx.builder = 'man'
         self.run_command('build_sphinx')
