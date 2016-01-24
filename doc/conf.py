@@ -15,10 +15,8 @@
 
 from __future__ import unicode_literals
 
-import errno
 from importlib import import_module
 import os
-import subprocess
 import sys
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -28,26 +26,7 @@ sys.path.insert(1, os.path.abspath('.'))
 sys.path.insert(2, os.path.abspath('..'))
 
 from pychroot import __version__
-from snakeoil.dist.generate_man_rsts import ManConverter
 
-
-def generate_docs():
-    """Generate various supporting files for building docs"""
-    try:
-        os.mkdir('generated')
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            return
-        raise
-
-    generated_man_pages = [('pychroot.cli', 'pychroot')]
-
-    # generate man page option docs
-    for module, script in generated_man_pages:
-        ManConverter.regen_if_needed('generated', module, out_name=script)
-
-    # generate API docs
-    subprocess.call(['sphinx-apidoc', '-Tf', '-o', 'api', '../pychroot'])
 
 # -- General configuration ------------------------------------------------
 
@@ -83,7 +62,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pychroot'
-copyright = '2014-2015, Tim Harder'
+copyright = '2014-2016, Tim Harder'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -271,8 +250,6 @@ man_pages = [
 # If true, show URL addresses after external links.
 #man_show_urls = False
 
-generate_docs()
-
 # -- Options for Texinfo output -------------------------------------------
 
 # Grouping the document tree into Texinfo files. List of tuples
@@ -303,7 +280,7 @@ texinfo_documents = [
 epub_title = 'pychroot'
 epub_author = 'Tim Harder'
 epub_publisher = 'Tim Harder'
-epub_copyright = '2014-2015, Tim Harder'
+epub_copyright = '2014-2016, Tim Harder'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = 'pychroot'
