@@ -22,8 +22,10 @@ import sys
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(1, os.path.abspath('.'))
-sys.path.insert(2, os.path.abspath('..'))
+libdir = os.path.abspath(os.path.join('..', 'build', 'lib'))
+if os.path.exists(libdir):
+    sys.path.insert(0, libdir)
+sys.path.insert(1, os.path.abspath('..'))
 
 from pychroot import __version__
 
@@ -62,7 +64,9 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pychroot'
-copyright = '2014-2016, Tim Harder'
+authors_list = ['Tim Harder']
+authors = ', '.join(authors)
+copyright = '2014-2016, pychroot contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -244,7 +248,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('man/pychroot', 'pychroot', import_module('pychroot.cli').__doc__.split('\n', 1)[0], ['Tim Harder'], 1)
+    ('man/pychroot', 'pychroot', import_module('pychroot.cli').__doc__.split('\n', 1)[0], authors_list, 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -257,7 +261,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'pychroot', 'pychroot Documentation',
-   'Tim Harder', 'pychroot', 'One line description of project.',
+   authors, 'pychroot', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -277,10 +281,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = 'pychroot'
-epub_author = 'Tim Harder'
-epub_publisher = 'Tim Harder'
-epub_copyright = '2014-2016, Tim Harder'
+epub_title = project
+epub_author = authors
+epub_publisher = authors
+epub_copyright = copyright
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = 'pychroot'
