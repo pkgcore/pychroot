@@ -10,19 +10,9 @@ from setuptools import setup, Command, find_packages
 import pkgdist
 
 
-class PyTest(Command):
-    user_options = [('match=', 'k', 'Run only tests that match the provided expressions')]
+class PyTest(pkgdist.PyTest):
 
-    def initialize_options(self):
-        self.match = None
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        cli_options = ['-k', self.match] if self.match else []
-        errno = subprocess.call([sys.executable, '-m', 'pytest'] + cli_options)
-        raise SystemExit(errno)
+    default_test_dir = os.path.join(pkgdist.TOPDIR, 'test')
 
 
 class PyLint(Command):
