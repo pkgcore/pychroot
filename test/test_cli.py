@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import errno
 import os
@@ -12,7 +12,7 @@ except ImportError:
 import pytest
 from pytest import raises
 
-from pychroot import cli
+from pychroot.scripts import pychroot as cli
 
 
 def test_arg_parsing():
@@ -70,7 +70,7 @@ def test_cli():
         with raises(SystemExit):
             cli.main(['nonexistent-dir'])
 
-    with mock.patch('pychroot.cli.Chroot'), \
+    with mock.patch('pychroot.scripts.pychroot.Chroot'), \
             mock.patch('os.execvp') as execvp:
 
         chroot = tempfile.mkdtemp()

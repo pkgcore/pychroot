@@ -245,10 +245,18 @@ latex_documents = [
 
 # -- Options for manual page output ---------------------------------------
 
+bin_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'bin')
+scripts = os.listdir(bin_path)
+
+generated_man_pages = [
+    ('%s.scripts.' % (project,) + s.replace('-', '_'), s) for s in scripts
+]
+
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('man/pychroot', 'pychroot', import_module('pychroot.cli').__doc__.split('\n', 1)[0], authors_list, 1)
+    ('man/%s' % script, script, import_module(module).__doc__.split('\n', 1)[0], authors_list, 1)
+    for module, script in generated_man_pages
 ]
 
 # If true, show URL addresses after external links.
