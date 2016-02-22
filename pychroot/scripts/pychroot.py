@@ -29,7 +29,7 @@ class mountpoints(argparse.Action):
 
 argparser = arghparse.ArgumentParser(
     color=False, debug=False, quiet=False, verbose=False,
-    description=__doc__.split('\n', 1)[0])
+    description=__doc__)
 argparser.add_argument('path', help='path to newroot')
 argparser.add_argument(
     'command', nargs=argparse.REMAINDER, help='optional command to run',
