@@ -11,7 +11,7 @@ import sys
 from pychroot.base import Chroot
 from pychroot.exceptions import ChrootError
 
-import snakeoil.cli  # needed for add_argument() docs kwargs
+from snakeoil.cli import arghparse # needed for add_argument() docs kwargs
 from snakeoil.version import get_version
 
 
