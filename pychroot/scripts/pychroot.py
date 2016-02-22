@@ -11,8 +11,7 @@ import sys
 from pychroot.base import Chroot
 from pychroot.exceptions import ChrootError
 
-from snakeoil.cli import arghparse # needed for add_argument() docs kwargs
-from snakeoil.version import get_version
+from snakeoil.cli import arghparse
 
 
 def bindmount(s, recursive=False, readonly=False):
@@ -28,10 +27,9 @@ class mountpoints(argparse.Action):
         namespace.mountpoints.update(values)
 
 
-argparser = argparse.ArgumentParser(
+argparser = arghparse.ArgumentParser(
+    color=False, debug=False, quiet=False, verbose=False,
     description=__doc__.split('\n', 1)[0])
-argparser.add_argument(
-    '--version', action='version', version=get_version('pychroot', __file__))
 argparser.add_argument('path', help='path to newroot')
 argparser.add_argument(
     'command', nargs=argparse.REMAINDER, help='optional command to run',
