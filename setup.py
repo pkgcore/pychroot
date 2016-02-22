@@ -54,6 +54,7 @@ setup(
     url='https://github.com/pkgcore/pychroot',
     license='BSD',
     packages=find_packages(),
+    scripts=os.listdir('bin'),
     install_requires=['snakeoil>=0.6.7'],
     setup_requires=['snakeoil>=0.6.7'],
     tests_require=test_requirements,
