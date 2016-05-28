@@ -55,8 +55,8 @@ setup(
     license='BSD',
     packages=find_packages(),
     scripts=os.listdir('bin'),
-    install_requires=['snakeoil>=0.6.7'],
-    setup_requires=['snakeoil>=0.6.7'],
+    install_requires=['snakeoil>=0.7.0'],
+    setup_requires=['snakeoil>=0.7.0'],
     tests_require=test_requirements,
     platforms='Posix',
     cmdclass={
