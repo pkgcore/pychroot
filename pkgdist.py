@@ -1,3 +1,4 @@
+# Copyright: 2015-2016 Tim Harder <radhermit@gmail.com>
 # Copyright: 2008-2011 Brian Harring <ferringb@gmail.com>
 # License: BSD/GPL2
 
@@ -13,6 +14,7 @@ import errno
 import inspect
 import io
 import math
+import operator
 import os
 import re
 import shlex
@@ -23,6 +25,8 @@ import textwrap
 
 os.environ["SNAKEOIL_DEMANDLOAD_PROTECTION"] = 'n'
 os.environ["SNAKEOIL_DEMANDLOAD_WARN"] = 'n'
+
+from setuptools.command import install as dst_install
 
 from distutils import log
 from distutils.core import Command, Extension
@@ -45,15 +49,22 @@ def find_project(topdir=TOPDIR):
     module.
     """
     topdir_depth = len(topdir.split('/'))
+    modules = []
 
     # look for a top-level module
     for root, dirs, files in os.walk(topdir):
+        # only descend at most one level
         if len(root.split('/')) > topdir_depth + 1:
             continue
         if '__init__.py' in files:
-            return os.path.basename(root)
+            modules.append(os.path.basename(root))
 
-    raise ValueError('No project module found')
+    if not modules:
+        raise ValueError('No project module found')
+    elif len(modules) > 1:
+        raise ValueError('Multiple project modules found: %s' % (', '.join(modules)))
+
+    return modules[0]
 
 
 # determine the project we're being imported into
@@ -100,6 +111,45 @@ def data_mapping(host_prefix, path, skip=None):
         if repo_path not in skip:
             yield (host_path, [os.path.join(root, x) for x in files
                                if os.path.join(root, x) not in skip])
+
+
+def pkg_config(*packages, **kw):
+    """Translate pkg-config data to compatible Extension parameters.
+
+    Example usage:
+
+    >>> from distutils.extension import Extension
+    >>> from pkgdist import pkg_config
+    >>>
+    >>> ext_kwargs = dict(
+    ...     include_dirs=['include'],
+    ...     extra_compile_args=['-std=c++11'],
+    ... )
+    >>> extensions = [
+    ...     Extension('foo', ['foo.c']),
+    ...     Extension('bar', ['bar.c'], **pkg_config('lcms2')),
+    ...     Extension('ext', ['ext.cpp'], **pkg_config(('nss', 'libusb-1.0'), **ext_kwargs)),
+    ... ]
+    """
+    flag_map = {
+        '-I': 'include_dirs',
+        '-L': 'library_dirs',
+        '-l': 'libraries',
+    }
+
+    try:
+        tokens = subprocess.check_output(
+            ['pkg-config', '--libs', '--cflags'] + list(packages)).split()
+    except OSError as e:
+        sys.stderr.write('running pkg-config failed: {}\n'.format(e.strerror))
+        sys.exit(1)
+
+    for token in tokens:
+        if token[:2] in flag_map:
+            kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
+        else:
+            kw.setdefault('extra_compile_args', []).append(token)
+    return kw
 
 
 class OptionalExtension(Extension):
@@ -210,15 +260,7 @@ class build_py(dst_build_py.build_py):
         from lib2to3 import refactor as ref_mod
         from snakeoil.dist import caching_2to3
 
-        if ((sys.version_info >= (3, 0) and sys.version_info < (3, 1, 2)) or
-                (sys.version_info >= (2, 6) and sys.version_info < (2, 6, 5))):
-            if proc_count not in (0, 1):
-                log.warn(
-                    "disabling parallelization: you're running a python version "
-                    "with a broken multiprocessing.queue.JoinableQueue.put "
-                    "(python bug 4660).")
-            proc_count = 1
-        elif proc_count == 0:
+        if proc_count == 0:
             import multiprocessing
             proc_count = multiprocessing.cpu_count()
 
@@ -464,6 +506,38 @@ class build_scripts(dst_build_scripts.build_scripts):
         self.copy_scripts()
 
 
+class build(dst_build.build):
+    """Generic build command."""
+
+    user_options = dst_build.build.user_options[:]
+    user_options.append(('enable-man-pages', None, 'build man pages'))
+    user_options.append(('enable-html-docs', None, 'build html docs'))
+
+    boolean_options = dst_build.build.boolean_options[:]
+    boolean_options.extend(['enable-man-pages', 'enable-html-docs'])
+
+    sub_commands = dst_build.build.sub_commands[:]
+    sub_commands.append(('build_ext', None))
+    sub_commands.append(('build_py', None))
+    sub_commands.append(('build_scripts', None))
+    sub_commands.append(('build_docs', operator.attrgetter('enable_html_docs')))
+    sub_commands.append(('build_man', operator.attrgetter('enable_man_pages')))
+
+    def initialize_options(self):
+        dst_build.build.initialize_options(self)
+        self.enable_man_pages = False
+        self.enable_html_docs = False
+
+    def finalize_options(self):
+        dst_build.build.finalize_options(self)
+        if self.enable_man_pages is None:
+            path = os.path.dirname(os.path.abspath(__file__))
+            self.enable_man_pages = not os.path.exists(os.path.join(path, 'man'))
+
+        if self.enable_html_docs is None:
+            self.enable_html_docs = False
+
+
 class install_docs(Command):
     """Install html documentation."""
 
@@ -565,6 +639,35 @@ class install_man(install_docs):
                 # .1, but allow a.1).
                 d[x] = 'man%s/%s' % (x[-1], os.path.basename(x))
         return d
+
+
+class install(dst_install.install):
+    """Generic install command."""
+
+    user_options = dst_install.install.user_options[:]
+    user_options.append(('enable-man-pages', None, 'install man pages'))
+    user_options.append(('enable-html-docs', None, 'install html docs'))
+
+    boolean_options = dst_install.install.boolean_options[:]
+    boolean_options.extend(['enable-man-pages', 'enable-html-docs'])
+
+    def initialize_options(self):
+        dst_install.install.initialize_options(self)
+        self.enable_man_pages = False
+        self.enable_html_docs = False
+
+    def finalize_options(self):
+        build_options = self.distribution.command_options.setdefault('build', {})
+        build_options['enable_html_docs'] = ('command_line', self.enable_html_docs and 1 or 0)
+        man_pages = self.enable_man_pages
+        if man_pages and os.path.exists('man'):
+            man_pages = False
+        build_options['enable_man_pages'] = ('command_line', man_pages and 1 or 0)
+        dst_install.install.finalize_options(self)
+
+    sub_commands = dst_install.install.sub_commands[:]
+    sub_commands.append(('install_man', operator.attrgetter('enable_man_pages')))
+    sub_commands.append(('install_docs', operator.attrgetter('enable_html_docs')))
 
 
 class test(Command):
@@ -682,7 +785,7 @@ class PyTest(Command):
         self.test_args = [self.default_test_dir]
         self.coverage = bool(self.coverage)
         if self.match is not None:
-            self.match = tuple(set(self.match.split(',')))
+            self.test_args.extend(['-k', self.match])
 
         if self.coverage:
             try:
