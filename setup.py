@@ -56,7 +56,6 @@ setup(
     packages=find_packages(),
     scripts=os.listdir('bin'),
     install_requires=['snakeoil>=0.7.0'],
-    setup_requires=['snakeoil>=0.7.0'],
     tests_require=test_requirements,
     platforms='Posix',
     cmdclass={
