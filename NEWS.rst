@@ -1,13 +1,18 @@
 Release Notes
 =============
 
+pychroot 0.9.14 (2015-05-28)
+----------------------------
+
+- Move to generic scripts and docs framework used by pkgcore. 
+
 pychroot 0.9.13 (2015-12-13)
 ----------------------------
 
 - Add --no-mounts option to disable the default mounts for the command line
   tool. This makes pychroot act similar to chroot.
 
-- Make pychroot pip-installable without requiring snakeoil to be manually
+- Make pychroot pip-installable without requiring wnakeoil to be manually
   installed first.
 
 - Add lots of additional content to the pychroot utility man page.
