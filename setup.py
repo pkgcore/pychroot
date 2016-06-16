@@ -59,7 +59,7 @@ setup(
     tests_require=test_requirements,
     platforms='Posix',
     cmdclass={
-        'build_py': pkgdist.build_py,
+        'build_py': pkgdist.build_py2to3,
         'build_scripts': pkgdist.build_scripts,
         'build_man': pkgdist.build_man,
         'build_docs': pkgdist.build_docs,
