@@ -12,8 +12,9 @@ except ImportError:
 
 from pytest import raises
 
-from pychroot.scripts.pychroot import parse_args
 from pychroot import scripts
+from pychroot.base import Chroot
+from pychroot.scripts.pychroot import parse_args
 
 
 def test_arg_parsing():
@@ -23,7 +24,14 @@ def test_arg_parsing():
 
     # unknown args
     with raises(SystemExit):
-        opts = parse_args('--foo --bar dir'.split())
+        opts = parse_args('--foo --bar fakedir'.split())
+
+    # no mounts
+    orig_default_mounts = Chroot.default_mounts.copy()
+    opts = parse_args('--no-mounts fakedir'.split())
+    assert Chroot.default_mounts == {}
+    Chroot.default_mounts = orig_default_mounts
+    assert Chroot.default_mounts != {}
 
     # single newroot arg with $SHELL from env
     with mock.patch('os.getenv', return_value='shell'):
