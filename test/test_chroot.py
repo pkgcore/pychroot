@@ -19,21 +19,21 @@ def test_Chroot():
             mock.patch('pychroot.base.dictbool') as dictbool, \
             mock.patch('pychroot.base.simple_unshare'):
 
-        c = Chroot('/')
+        chroot = Chroot('/')
         bind.side_effect = None
         exists.return_value = False
         dictbool.return_value = True
-        c.mount()
+        chroot.mount()
         assert not bind.called
 
     with mock.patch('os.fork') as fork, \
-            mock.patch('os.chroot') as chroot, \
+            mock.patch('os.chroot'), \
             mock.patch('os.chdir') as chdir, \
             mock.patch('os.remove') as remove, \
-            mock.patch('os._exit') as exit, \
+            mock.patch('os._exit'), \
             mock.patch('os.path.exists') as exists, \
-            mock.patch('os.waitpid') as waitpid, \
-            mock.patch('pychroot.utils.mount') as mount, \
+            mock.patch('os.waitpid'), \
+            mock.patch('pychroot.utils.mount'), \
             mock.patch('pychroot.base.simple_unshare'):
 
         # bad path
@@ -47,11 +47,11 @@ def test_Chroot():
             Chroot('/', mountpoints={'$FAKEVAR': {}})
 
         # optional, undefined variable mounts get dropped
-        c = Chroot('/', mountpoints={
+        chroot = Chroot('/', mountpoints={
             '$FAKEVAR': {'optional': True},
             '/home/user': {}})
-        assert '$FAKEVAR' not in c.mounts
-        assert len(list(c.mounts)) - len(c.default_mounts) == 1
+        assert '$FAKEVAR' not in chroot.mounts
+        assert len(list(chroot.mounts)) - len(chroot.default_mounts) == 1
 
         with mock.patch('os.getenv', return_value='/fake/src/path'):
             Chroot('/', mountpoints={'$FAKEVAR': {}})
@@ -59,34 +59,34 @@ def test_Chroot():
         # test parent process
         fork.return_value = 10
 
-        c = Chroot('/', hostname='test')
-        with c:
+        chroot = Chroot('/', hostname='test')
+        with chroot:
             pass
 
         # test child process
         fork.return_value = 0
 
-        c = Chroot('/')
-        with c:
+        chroot = Chroot('/')
+        with chroot:
             pass
 
         # make sure the default mount points aren't altered
         # when passing custom mount points
         default_mounts = Chroot.default_mounts.copy()
-        c = Chroot('/', mountpoints={'tmpfs:/tmp': {}})
-        assert default_mounts == c.default_mounts
+        chroot = Chroot('/', mountpoints={'tmpfs:/tmp': {}})
+        assert default_mounts == chroot.default_mounts
 
         remove.side_effect = Exception('fake exception')
         exists.side_effect = chain([True], cycle([False]))
-        c = Chroot('/', mountpoints={'/root:/blah': {}})
+        chroot = Chroot('/', mountpoints={'/root:/blah': {}})
         with raises(ChrootMountError):
-            with c:
+            with chroot:
                 pass
         remove.side_effect = None
         exists.side_effect = None
 
         chdir.side_effect = Exception('fake exception')
-        with c:
+        with chroot:
             pass
         chdir.side_effect = None
 

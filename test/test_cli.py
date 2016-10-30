@@ -65,11 +65,11 @@ def test_cli():
         cli(['nonexistent-dir'])
 
     with mock.patch('os.geteuid', return_value=0), \
-            mock.patch('os.fork') as fork, \
+            mock.patch('os.fork'), \
             mock.patch('os.chroot') as chroot, \
-            mock.patch('os._exit') as exit, \
-            mock.patch('os.waitpid') as waitpid, \
-            mock.patch('pychroot.utils.mount') as mount, \
+            mock.patch('os._exit'), \
+            mock.patch('os.waitpid'), \
+            mock.patch('pychroot.utils.mount'), \
             mock.patch('os.execvp') as execvp, \
             mock.patch('pychroot.scripts.import_module') as import_module, \
             mock.patch('pychroot.base.simple_unshare'):
