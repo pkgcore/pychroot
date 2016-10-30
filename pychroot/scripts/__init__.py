@@ -5,7 +5,8 @@ import os
 import sys
 
 
-def main(script_name):
+def main(script_name, args=None):
+    args = args if args is not None else sys.argv[1:]
     try:
         script_module = '.'.join(
             os.path.realpath(__file__).split('/')[-3:-1] +
@@ -17,12 +18,12 @@ def main(script_name):
             'Verify that snakeoil is properly installed '
             'and/or PYTHONPATH is set correctly for python %s.\n' %
             ('.'.join(map(str, sys.version_info[:3])),))
-        if '--debug' in sys.argv:
+        if '--debug' in args:
             raise
         sys.stderr.write('Add --debug to the commandline for a traceback.\n')
         sys.exit(1)
 
-    script.main()
+    script.main(args)
 
 
 if __name__ == '__main__':

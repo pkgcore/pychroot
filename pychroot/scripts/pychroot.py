@@ -109,8 +109,7 @@ def parse_args(args):
     return opts
 
 
-def main(args=None):
-    args = args if args is not None else sys.argv[1:]
+def main(args):
     opts = parse_args(args)
 
     try:
