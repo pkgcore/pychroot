@@ -2,6 +2,6 @@
 
 from __future__ import unicode_literals
 
-__version__ = '0.9.16'
+__version__ = '0.9.17'
 
 from pychroot.base import Chroot
