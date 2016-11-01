@@ -212,9 +212,11 @@ class sdist(dst_sdist.sdist):
         """
 
         if 'build_man' in self.distribution.cmdclass:
+            build_man = self.reinitialize_command('build_man')
+            build_man.ensure_finalized()
             self.run_command('build_man')
-            shutil.copytree(os.path.join(os.getcwd(), "build/sphinx/man"),
-                            os.path.join(base_dir, "man"))
+            shutil.copytree(os.path.join(os.getcwd(), build_man.content_search_path[0]),
+                            os.path.join(base_dir, build_man.content_search_path[1]))
 
         dst_sdist.sdist.make_release_tree(self, base_dir, files)
         self.generate_verinfo(base_dir)
