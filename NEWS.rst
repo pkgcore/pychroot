@@ -1,15 +1,23 @@
 Release Notes
 =============
 
-pychroot 0.9.15 (2015-05-29)
+pychroot 0.9.16 (2016-10-31)
+----------------------------
+
+- Don't try to generate new version files if they already exist (fixes another
+  pip install issue).
+
+- Drop py3.3 support.
+
+pychroot 0.9.15 (2016-05-29)
 ----------------------------
 
 - Fix new installs using pip.
 
-pychroot 0.9.14 (2015-05-28)
+pychroot 0.9.14 (2016-05-28)
 ----------------------------
 
-- Move to generic scripts and docs framework used by pkgcore. 
+- Move to generic scripts and docs framework used by pkgcore.
 
 pychroot 0.9.13 (2015-12-13)
 ----------------------------
