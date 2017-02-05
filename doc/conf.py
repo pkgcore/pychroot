@@ -66,7 +66,7 @@ master_doc = 'index'
 project = 'pychroot'
 authors_list = ['Tim Harder']
 authors = ', '.join(authors_list)
-copyright = '2014-2016, pychroot contributors'
+copyright = '2014-2017, pychroot contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
