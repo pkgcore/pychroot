@@ -12,7 +12,6 @@ Specifically, this module is only meant to be imported in setup.py scripts.
 
 import copy
 import errno
-import inspect
 import io
 import math
 import operator
@@ -40,7 +39,7 @@ from distutils.command import (
 READTHEDOCS = os.environ.get('READTHEDOCS', None) == 'True'
 
 # top level repo/tarball directory
-TOPDIR = os.path.dirname(os.path.abspath(inspect.stack(0)[1][1]))
+TOPDIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def find_project(topdir=TOPDIR):
@@ -63,7 +62,7 @@ def find_project(topdir=TOPDIR):
     if not modules:
         raise ValueError('No project module found')
     elif len(modules) > 1:
-        raise ValueError('Multiple project modules found: %s' % (', '.join(modules)))
+        raise ValueError('Multiple project modules found in %r: %s' % (topdir, ', '.join(modules)))
 
     return modules[0]
 
@@ -169,6 +168,16 @@ def pkg_config(*packages, **kw):
     return kw
 
 
+def cython_exts(path=PROJECT):
+    """Return all available cython extensions under a given path."""
+    cython_exts = []
+    for root, _dirs, files in os.walk(path):
+        for f in files:
+            if f.endswith('.pyx'):
+                cython_exts.append(os.path.join(root, f))
+    return cython_exts
+
+
 class OptionalExtension(Extension):
     """Python extension that is optional to build.
 
@@ -226,12 +235,10 @@ class sdist(dst_sdist.sdist):
         build_ext.ensure_finalized()
 
         # generate cython extensions if any exist
-        cython = any(
-            os.path.splitext(f)[1] == '.pyx' for e in
-            build_ext.extensions for f in e.sources)
-        if cython:
+        extensions = cython_exts()
+        if extensions:
             from Cython.Build import cythonize
-            cythonize(build_ext.extensions)
+            cythonize(extensions)
 
         dst_sdist.sdist.run(self)
 
@@ -862,7 +869,7 @@ class PyTest(Command):
         ('match=', 'k', 'run only tests that match the provided expressions'),
     ]
 
-    default_test_dir = os.path.join(TOPDIR, PROJECT, 'test')
+    default_test_dir = os.path.join(TOPDIR, 'test')
 
     def initialize_options(self):
         self.pytest_args = ''
