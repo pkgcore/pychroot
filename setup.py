@@ -10,11 +10,6 @@ from setuptools import setup, Command, find_packages
 import pkgdist
 
 
-class PyTest(pkgdist.PyTest):
-
-    default_test_dir = os.path.join(pkgdist.TOPDIR, 'test')
-
-
 class PyLint(Command):
     user_options = [('errorsonly', 'E', 'Check only errors with pylint'),
                     ('format=', 'f', 'Change the output format')]
@@ -66,7 +61,7 @@ setup(
         'install_man': pkgdist.install_man,
         'install_docs': pkgdist.install_docs,
         'sdist': pkgdist.sdist,
-        'test': PyTest,
+        'test': pkgdist.PyTest,
         'lint': PyLint,
     },
     classifiers=(
