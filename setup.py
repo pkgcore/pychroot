@@ -10,26 +10,6 @@ from setuptools import setup, Command, find_packages
 import pkgdist
 
 
-class PyLint(Command):
-    user_options = [('errorsonly', 'E', 'Check only errors with pylint'),
-                    ('format=', 'f', 'Change the output format')]
-
-    def initialize_options(self):
-        self.errorsonly = 0
-        self.format = 'colorized'
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        rcfile = os.path.abspath('.pylintrc')
-        standaloneModules = [m for m in []]
-        cli_options = ['-E'] if self.errorsonly else []
-        cli_options.append('--output-format={0}'.format(self.format))
-        errno = subprocess.call([sys.executable, '-m', 'pylint', '--rcfile={}'.format(rcfile), '--output-format=colorized'] +
-                                cli_options + ['pychroot'] + standaloneModules)
-        raise SystemExit(errno)
-
 test_requirements = ['pytest']
 if sys.hexversion < 0x03030000:
     test_requirements.append('mock')
@@ -61,8 +41,8 @@ setup(
         'install_man': pkgdist.install_man,
         'install_docs': pkgdist.install_docs,
         'sdist': pkgdist.sdist,
-        'test': pkgdist.PyTest,
-        'lint': PyLint,
+        'test': pkgdist.pytest,
+        'lint': pkgdist.pylint,
     },
     classifiers=(
         'Intended Audience :: Developers',
