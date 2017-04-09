@@ -39,20 +39,22 @@ argparser.add_argument(
         Similar to chroot(1), if unspecified this defaults to $SHELL from the
         host environment and if that's unset it executes /bin/sh.
     """)
-argparser.add_argument(
+
+chroot_options = argparser.add_argument_group('chroot options')
+chroot_options.add_argument(
     '--no-mounts', action='store_true',
     help='disable the default bind mounts',
     docs="""
         Disable the default bind mounts which can be used to obtain a standard
         chroot environment that you'd expect when using chroot(1).
     """)
-argparser.add_argument(
+chroot_options.add_argument(
     '--hostname', type=str, help='specify the chroot hostname',
     docs="""
         Specify the chroot hostname. In order to set the domain name as well,
         pass an FQDN instead of a singular hostname.
     """)
-argparser.add_argument(
+chroot_options.add_argument(
     '--skip-chdir', action='store_true',
     help="do not change working directory to '/'",
     docs="""
@@ -63,7 +65,7 @@ argparser.add_argument(
         environment on the current host system rootfs with one caveat: any
         absolute paths will use the new rootfs.
     """)
-argparser.add_argument(
+chroot_options.add_argument(
     '-B', '--bind', type=bindmount, action=mountpoints,
     metavar='SRC[:DEST]', help='specify custom bind mount',
     docs="""
@@ -75,12 +77,11 @@ argparser.add_argument(
 
             pychroot -B /srv/data -B /srv/data:/home/user/data /path/to/chroot
     """)
-argparser.add_argument(
+chroot_options.add_argument(
     '-R', '--rbind', type=partial(bindmount, recursive=True),
     action=mountpoints, metavar='SRC[:DEST]',
     help='specify custom recursive bind mount')
-
-argparser.add_argument(
+chroot_options.add_argument(
     '--ro', '--readonly', type=partial(bindmount, readonly=True),
     action=mountpoints, metavar='SRC[:DEST]',
     help='specify custom readonly bind mount',
