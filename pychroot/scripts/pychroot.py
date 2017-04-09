@@ -15,11 +15,13 @@ from snakeoil.cli import arghparse
 
 
 def bindmount(s, recursive=False, readonly=False):
+    """Argparse argument type for bind mount variants."""
     opts = {'recursive': recursive, 'readonly': readonly}
     return {s: opts}
 
 
 class mountpoints(argparse.Action):
+    """Argparse action that adds specified mountpoint to be mounted."""
 
     def __call__(self, parser, namespace, values, option_string=None):
         if not getattr(namespace, 'mountpoints', False):
