@@ -4,14 +4,26 @@ python:
   - 3.4
   - 3.5
   - 3.6
-sudo: false
+env:
+  global:
+    - secure: "ABSBnKN/wz77Bqy4MVaaJX5r0GfWvBNBOFkhWYOqYWW+7b3JnHI4YnbgQhzoe8iTaSbURD4kde59gFtWPAwwWb3lNiR5Chcz5nqgmPDwKpzUIC8BPwB7mry1WrIZx6VVszRNOqPvCZYSxfsX6OVfgsokNlzDeQyV+WNOnn69Xyo="
+    - secure: "gmbd4ne2xhPSohAbBzabfAW2ykJcTUpMQ7hAl1x8gfYlDZe3d1em+g5J3lUnmIDIB3pgj4/6G8ua64eWMZVP3d9RQJaRdL+f5idN3fLxpFlXBcbuVK64tytVkJI7U+NoJ4GOAx5YU17UBylZiywbU4/eBBu3BpZF+rwLJ2JyOeQ="
+    - CIBW_PLATFORM=linux
+    - CIBW_SKIP="cp26-* cp33-*"
+    - CIBW_BEFORE_BUILD="{pip} install -r requirements.txt"
+sudo: required
+services:
+  - docker
 cache:
   directories:
     - $HOME/.cache/pip
 install:
   - pip install --upgrade pip
   - pip install --only-binary ":all:" tox codecov
-script: tox -e travis
+before_script: git clone https://github.com/pkgcore/pkgdist.git
+script:
+  - tox -e travis
+  - pkgdist/build-dist-files.sh
 after_success:
   # upload coverage data
   - pushd .tox/travis/lib/python*/site-packages
