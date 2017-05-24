@@ -975,7 +975,7 @@ class pylint(Command):
             raise DistutilsExecError('pylint is not installed')
 
         lint_args = [PROJECT]
-        rcfile = os.path.abspath('.pylintrc')
+        rcfile = os.path.join(TOPDIR, '.pylintrc')
         if os.path.exists(rcfile):
             lint_args.extend(['--rcfile', rcfile])
         if self.errors_only:
