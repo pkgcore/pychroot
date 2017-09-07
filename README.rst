@@ -125,5 +125,5 @@ Note that mock_ is required for tests when using python-2.7.
     :target: https://pypi.python.org/pypi/pychroot
 .. |test| image:: https://travis-ci.org/pkgcore/pychroot.svg?branch=master
     :target: https://travis-ci.org/pkgcore/pychroot
-.. |coverage| image:: https://coveralls.io/repos/pkgcore/pychroot/badge.png?branch=master
-    :target: https://coveralls.io/r/pkgcore/pychroot?branch=master
+.. |coverage| image:: https://codecov.io/gh/pkgcore/pychroot/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/pkgcore/pychroot
