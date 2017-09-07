@@ -6,9 +6,9 @@ import os
 import shlex
 import tempfile
 try:
-    from unittest import mock
+    from unittest.mock import patch
 except ImportError:
-    import mock
+    from mock import patch
 
 from pytest import raises
 
@@ -30,14 +30,14 @@ def test_arg_parsing(capfd):
     assert Chroot.default_mounts != {}
 
     # single newroot arg with $SHELL from env
-    with mock.patch('os.getenv', return_value='shell'):
+    with patch('os.getenv', return_value='shell'):
         opts = pychroot.parse_args(['dir'])
         assert opts.path == 'dir'
         assert opts.command == ['shell', '-i']
         assert opts.mountpoints is None
 
     # default shell when $SHELL isn't defined in the env
-    with mock.patch.dict('os.environ', {}, clear=True):
+    with patch.dict('os.environ', {}, clear=True):
         opts = pychroot.parse_args(['dir'])
         assert opts.command == ['/bin/sh', '-i']
 
@@ -72,8 +72,8 @@ def test_cli(capfd):
         "pychroot: error: cannot change root directory "
         "to 'nonexistent': Not a directory\n")
 
-    with mock.patch('pychroot.scripts.pychroot.Chroot'), \
-            mock.patch('os.execvp') as execvp:
+    with patch('pychroot.scripts.pychroot.Chroot'), \
+            patch('os.execvp') as execvp:
 
         chroot = tempfile.mkdtemp()
 
@@ -106,11 +106,11 @@ def test_script_run(capfd):
     project = script_module.__name__.split('.')[0]
     script = partial(run, project)
 
-    with mock.patch('{}.scripts.import_module'.format(project)) as import_module:
+    with patch('{}.scripts.import_module'.format(project)) as import_module:
         import_module.side_effect = ImportError("baz module doesn't exist")
 
         # default error path when script import fails
-        with mock.patch('sys.argv', []):
+        with patch('sys.argv', []):
             with raises(SystemExit) as excinfo:
                 script()
             assert excinfo.value.code == 1
@@ -122,7 +122,7 @@ def test_script_run(capfd):
             assert err[2] == "Add --debug to the commandline for a traceback."
 
         # running with --debug should raise an ImportError when there are issues
-        with mock.patch('sys.argv', ['script', '--debug']):
+        with patch('sys.argv', ['script', '--debug']):
             with raises(ImportError):
                 script()
             out, err = capfd.readouterr()
@@ -134,7 +134,7 @@ def test_script_run(capfd):
         import_module.reset_mock()
 
     # no args
-    with mock.patch('sys.argv', []):
+    with patch('sys.argv', []):
         with raises(SystemExit) as excinfo:
             script()
         assert excinfo.value.code == 2
