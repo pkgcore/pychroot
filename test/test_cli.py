@@ -4,6 +4,7 @@ import errno
 from functools import partial
 import os
 import shlex
+import sys
 import tempfile
 try:
     from unittest import mock
@@ -12,41 +13,38 @@ except ImportError:
 
 from pytest import raises
 
-from pychroot import scripts
+from snakeoil.cli.tool import Tool
+
+from pychroot.scripts import run, pychroot as script_module
 from pychroot.base import Chroot
-from pychroot.scripts.pychroot import parse_args
 
 
-def test_arg_parsing():
-    # one argument required
-    with raises(TypeError):
-        parse_args()
-
-    # unknown args
-    with raises(SystemExit):
-        opts = parse_args('--foo --bar fakedir'.split())
+def test_arg_parsing(capfd):
+    """Various argparse checks."""
+    pychroot = Tool(script_module)
 
     # no mounts
     orig_default_mounts = Chroot.default_mounts.copy()
-    opts = parse_args('--no-mounts fakedir'.split())
+    opts = pychroot.parse_args('--no-mounts fakedir'.split())
     assert Chroot.default_mounts == {}
     Chroot.default_mounts = orig_default_mounts
     assert Chroot.default_mounts != {}
 
     # single newroot arg with $SHELL from env
     with mock.patch('os.getenv', return_value='shell'):
-        opts = parse_args(['dir'])
+        opts = pychroot.parse_args(['dir'])
         assert opts.path == 'dir'
         assert opts.command == ['shell', '-i']
         assert opts.mountpoints is None
 
     # default shell when $SHELL isn't defined in the env
     with mock.patch.dict('os.environ', {}, clear=True):
-        opts = parse_args(['dir'])
+        opts = pychroot.parse_args(['dir'])
         assert opts.command == ['/bin/sh', '-i']
 
     # complex args
-    opts = parse_args(shlex.split('-R /home -B /tmp --ro /var dir cmd arg "arg1 arg2"'))
+    opts = pychroot.parse_args(shlex.split(
+        '-R /home -B /tmp --ro /var dir cmd arg "arg1 arg2"'))
     assert opts.path == 'dir'
     assert opts.command == ['cmd', 'arg', 'arg1 arg2']
     assert opts.path == 'dir'
@@ -57,38 +55,23 @@ def test_arg_parsing():
     }
 
 
-def test_cli():
-    cli = partial(scripts.main, 'pychroot')
+def test_cli(capfd):
+    """Various command line interaction checks."""
+    pychroot = Tool(script_module)
 
-    # no root perms
-    with raises(SystemExit):
-        cli(['nonexistent-dir'])
+    # no args
+    ret = pychroot([])
+    assert ret == 2
+    out, err = capfd.readouterr()
+    assert err == 'pychroot: error: too few arguments\n'
 
-    with mock.patch('os.geteuid', return_value=0), \
-            mock.patch('os.fork'), \
-            mock.patch('os.chroot') as chroot, \
-            mock.patch('os._exit'), \
-            mock.patch('os.waitpid'), \
-            mock.patch('pychroot.utils.mount'), \
-            mock.patch('os.execvp') as execvp, \
-            mock.patch('pychroot.scripts.import_module') as import_module, \
-            mock.patch('pychroot.base.simple_unshare'):
-
-        # import failure
-        import_module.side_effect = ImportError("module doesn't exist")
-        with raises(SystemExit):
-            cli([])
-        with raises(ImportError):
-            cli(['--debug'])
-        import_module.reset_mock()
-
-        # no args
-        with raises(SystemExit):
-            cli([])
-
-        # nonexistent newroot dir
-        with raises(SystemExit):
-            cli(['nonexistent-dir'])
+    # nonexistent directory
+    ret = pychroot(['nonexistent'])
+    assert ret == 1
+    out, err = capfd.readouterr()
+    assert err == (
+        "pychroot: error: cannot change root directory "
+        "to 'nonexistent': Not a directory\n")
 
     with mock.patch('pychroot.scripts.pychroot.Chroot'), \
             mock.patch('os.execvp') as execvp:
@@ -96,27 +79,67 @@ def test_cli():
         chroot = tempfile.mkdtemp()
 
         # exec arg testing
-        cli([chroot])
+        pychroot([chroot])
         shell = os.getenv('SHELL', '/bin/sh')
         execvp.assert_called_once_with(shell, [shell, '-i'])
         execvp.reset_mock()
 
-        cli([chroot, 'ls -R /'])
+        pychroot([chroot, 'ls -R /'])
         execvp.assert_called_once_with('ls -R /', ['ls -R /'])
         execvp.reset_mock()
 
         e = EnvironmentError("command doesn't exist")
         e.errno = errno.ENOENT
+        e.strerror = os.strerror(e.errno)
         execvp.side_effect = e
-        with raises(SystemExit):
-            cli([chroot])
-        execvp.reset_mock()
-
-        e = EnvironmentError('fake exception')
-        e.errno = errno.EIO
-        execvp.side_effect = e
-        with raises(EnvironmentError):
-            cli([chroot])
+        pychroot([chroot, 'nonexistent'])
+        out, err = capfd.readouterr()
+        assert err == (
+            "pychroot: error: failed to run command "
+            "'nonexistent': {}\n".format(e.strerror))
         execvp.reset_mock()
 
         os.rmdir(chroot)
+
+
+def test_script_run(capfd):
+    """Test regular code path for running scripts."""
+    project = script_module.__name__.split('.')[0]
+    script = partial(run, project)
+    orig_argv = sys.argv
+
+    with mock.patch('{}.scripts.import_module'.format(project)) as import_module:
+        import_module.side_effect = ImportError("baz module doesn't exist")
+
+        # default error path when script import fails
+        sys.argv = []
+        with raises(SystemExit) as excinfo:
+            script()
+        assert excinfo.value.code == 1
+        out, err = capfd.readouterr()
+        err = err.strip().split('\n')
+        assert len(err) == 3
+        assert err[0] == "Failed importing: baz module doesn't exist!"
+        assert err[1].startswith("Verify that {} and its deps".format(project))
+        assert err[2] == "Add --debug to the commandline for a traceback."
+
+        # running with --debug should raise an ImportError when there are issues
+        sys.argv = ['script', '--debug']
+        with raises(ImportError):
+            script()
+        out, err = capfd.readouterr()
+        err = err.strip().split('\n')
+        assert len(err) == 2
+        assert err[0] == "Failed importing: baz module doesn't exist!"
+        assert err[1].startswith("Verify that {} and its deps".format(project))
+        sys.argv = orig_argv
+
+        import_module.reset_mock()
+
+    # no args
+    sys.argv = []
+    with raises(SystemExit) as excinfo:
+        script()
+    assert excinfo.value.code == 2
+    out, err = capfd.readouterr()
+    assert err == '{}: error: too few arguments\n'.format(project)

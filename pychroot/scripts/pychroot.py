@@ -31,7 +31,7 @@ class mountpoints(argparse.Action):
 
 argparser = arghparse.ArgumentParser(
     color=False, debug=False, quiet=False, verbose=False,
-    description=__doc__)
+    description=__doc__, script=(__file__, __name__))
 argparser.add_argument('path', help='path to newroot')
 argparser.add_argument(
     'command', nargs=argparse.REMAINDER, help='optional command to run',
@@ -97,33 +97,30 @@ chroot_options.add_argument(
     """)
 
 
-def parse_args(args):
-    opts = argparser.parse_args(args)
+@argparser.bind_final_check
+def _validate_args(parser, namespace):
+    if not namespace.command:
+        namespace.command = [os.getenv('SHELL', '/bin/sh'), '-i']
 
-    if not opts.command:
-        opts.command = [os.getenv('SHELL', '/bin/sh'), '-i']
+    if not hasattr(namespace, 'mountpoints'):
+        namespace.mountpoints = None
 
-    if not hasattr(opts, 'mountpoints'):
-        opts.mountpoints = None
-
-    if opts.no_mounts:
+    if namespace.no_mounts:
         Chroot.default_mounts = {}
 
-    return opts
 
-
-def main(args):
-    opts = parse_args(args)
-
+@argparser.bind_main_func
+def main(options, out, err):
     try:
-        with Chroot(opts.path, mountpoints=opts.mountpoints,
-                    hostname=opts.hostname, skip_chdir=opts.skip_chdir):
-            os.execvp(opts.command[0], opts.command)
+        with Chroot(options.path, mountpoints=options.mountpoints,
+                    hostname=options.hostname, skip_chdir=options.skip_chdir):
+            os.execvp(options.command[0], options.command)
     except EnvironmentError as e:
         if (e.errno == errno.ENOENT):
-            raise SystemExit(
-                "{}: failed to run command '{}': {}".format(
-                    os.path.basename(sys.argv[0]), opts.command[0], e.strerror))
+            argparser.error("failed to run command '{}': {}".format(
+                options.command[0], e.strerror), status=1)
         raise
     except ChrootError as e:
-        raise SystemExit('{}: {}'.format(os.path.basename(sys.argv[0]), str(e)))
+        argparser.error(str(e), status=1)
+
+    return 0
