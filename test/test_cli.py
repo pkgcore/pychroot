@@ -63,7 +63,7 @@ def test_cli(capfd):
     ret = pychroot([])
     assert ret == 2
     out, err = capfd.readouterr()
-    assert err == 'pychroot: error: too few arguments\n'
+    assert err.startswith("pychroot: error: ")
 
     # nonexistent directory
     ret = pychroot(['nonexistent'])
@@ -142,4 +142,4 @@ def test_script_run(capfd):
         script()
     assert excinfo.value.code == 2
     out, err = capfd.readouterr()
-    assert err == '{}: error: too few arguments\n'.format(project)
+    assert err.startswith("{}: error: ".format(project))
