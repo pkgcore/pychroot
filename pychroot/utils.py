@@ -86,7 +86,11 @@ def bind(src, dest, chroot, create=False, log=None, readonly=False,
                 raise
 
         if not os.path.isdir(src) and src not in fstypes:
-            touch(dest)
+            try:
+                touch(dest)
+            except OSError as e:
+                raise ChrootMountError(
+                    "cannot bind mount to '{}'".format(dest), getattr(e, 'errno', None))
 
     if not os.path.exists(src) and src not in fstypes:
         raise ChrootMountError("cannot bind mount from '{}'".format(src), errno.ENOENT)
