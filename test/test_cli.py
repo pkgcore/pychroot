@@ -4,7 +4,6 @@ import errno
 from functools import partial
 import os
 import shlex
-import sys
 import tempfile
 try:
     from unittest import mock
@@ -106,40 +105,38 @@ def test_script_run(capfd):
     """Test regular code path for running scripts."""
     project = script_module.__name__.split('.')[0]
     script = partial(run, project)
-    orig_argv = sys.argv
 
     with mock.patch('{}.scripts.import_module'.format(project)) as import_module:
         import_module.side_effect = ImportError("baz module doesn't exist")
 
         # default error path when script import fails
-        sys.argv = []
-        with raises(SystemExit) as excinfo:
-            script()
-        assert excinfo.value.code == 1
-        out, err = capfd.readouterr()
-        err = err.strip().split('\n')
-        assert len(err) == 3
-        assert err[0] == "Failed importing: baz module doesn't exist!"
-        assert err[1].startswith("Verify that {} and its deps".format(project))
-        assert err[2] == "Add --debug to the commandline for a traceback."
+        with mock.patch('sys.argv', []):
+            with raises(SystemExit) as excinfo:
+                script()
+            assert excinfo.value.code == 1
+            out, err = capfd.readouterr()
+            err = err.strip().split('\n')
+            assert len(err) == 3
+            assert err[0] == "Failed importing: baz module doesn't exist!"
+            assert err[1].startswith("Verify that {} and its deps".format(project))
+            assert err[2] == "Add --debug to the commandline for a traceback."
 
         # running with --debug should raise an ImportError when there are issues
-        sys.argv = ['script', '--debug']
-        with raises(ImportError):
-            script()
-        out, err = capfd.readouterr()
-        err = err.strip().split('\n')
-        assert len(err) == 2
-        assert err[0] == "Failed importing: baz module doesn't exist!"
-        assert err[1].startswith("Verify that {} and its deps".format(project))
-        sys.argv = orig_argv
+        with mock.patch('sys.argv', ['script', '--debug']):
+            with raises(ImportError):
+                script()
+            out, err = capfd.readouterr()
+            err = err.strip().split('\n')
+            assert len(err) == 2
+            assert err[0] == "Failed importing: baz module doesn't exist!"
+            assert err[1].startswith("Verify that {} and its deps".format(project))
 
         import_module.reset_mock()
 
     # no args
-    sys.argv = []
-    with raises(SystemExit) as excinfo:
-        script()
-    assert excinfo.value.code == 2
-    out, err = capfd.readouterr()
-    assert err.startswith("{}: error: ".format(project))
+    with mock.patch('sys.argv', []):
+        with raises(SystemExit) as excinfo:
+            script()
+        assert excinfo.value.code == 2
+        out, err = capfd.readouterr()
+        assert err.startswith("{}: error: ".format(project))
