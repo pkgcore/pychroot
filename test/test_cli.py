@@ -18,7 +18,7 @@ from pychroot.scripts import run, pychroot as script_module
 from pychroot.base import Chroot
 
 
-def test_arg_parsing(capfd):
+def test_arg_parsing():
     """Various argparse checks."""
     pychroot = Tool(script_module)
 
