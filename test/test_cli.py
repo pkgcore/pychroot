@@ -74,7 +74,8 @@ def test_cli(capfd):
 
     with patch('pychroot.scripts.pychroot.Chroot'), \
             patch('os.execvp') as execvp:
-
+        # TODO: replace with tempfile.TemporaryDirectory() context manager
+        # after dropping py2.7 support
         chroot = tempfile.mkdtemp()
 
         # exec arg testing
