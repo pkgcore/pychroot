@@ -87,7 +87,7 @@ class Chroot(SplitExec):
             dest = os.path.join(self.path, dest.lstrip('/'))
             yield k, source, dest, options
 
-    def child_setup(self):
+    def _child_setup(self):
         kwargs = {}
         if os.getuid() != 0:
             # Enable a user namespace if we're not root. Note that this also
@@ -99,12 +99,12 @@ class Chroot(SplitExec):
             kwargs.update({'user': True, 'net': True})
 
         simple_unshare(pid=True, hostname=self.hostname, **kwargs)
-        self.mount()
+        self._mount()
         os.chroot(self.path)
         if not self.skip_chdir:
             os.chdir('/')
 
-    def cleanup(self):
+    def _cleanup(self):
         # remove mount points that were dynamically created
         for _, _, chrmount, opts in self.mounts:
             if 'create' not in opts:
@@ -122,7 +122,7 @@ class Chroot(SplitExec):
                 raise ChrootMountError(
                     "failed to remove chroot mount point '{}'".format(chrmount), getattr(e, 'errno', None))
 
-    def mount(self):
+    def _mount(self):
         """Do the bind mounts for this chroot object.
 
         This _must_ be run after creating a new mount namespace.

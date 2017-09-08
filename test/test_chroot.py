@@ -23,7 +23,7 @@ def test_Chroot():
         bind.side_effect = None
         exists.return_value = False
         dictbool.return_value = True
-        chroot.mount()
+        chroot._mount()
         assert not bind.called
 
     with mock.patch('os.fork') as fork, \
