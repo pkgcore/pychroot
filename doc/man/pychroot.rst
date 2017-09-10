@@ -3,24 +3,7 @@ pychroot
 ========
 
 .. include:: ../generated/pychroot/main_synopsis.rst
-
-Description
-===========
-
-pychroot is an extended **chroot(1)** equivalent that also provides support for
-automatically handling bind mounts. By default, the proc and sysfs filesystems
-are mounted to their respective /proc and /sys locations inside the chroot as
-well as bind mounting /dev and /etc/resolv.conf from the host system.
-
-In addition to the defaults, the user is able to specify custom bind mounts.
-For example, the following command will recursively bind mount the user's home
-directory at the same location inside the chroot directory::
-
-    pychroot -R /home/user ~/chroot
-
-This allows a user to easily set up a custom chroot environment without having
-to resort to scripted mount handling or other methods.
-
+.. include:: ../generated/pychroot/main_description.rst
 .. include:: ../generated/pychroot/main_options.rst
 
 Example Usage
