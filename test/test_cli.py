@@ -14,13 +14,15 @@ from pytest import raises
 
 from snakeoil.cli.tool import Tool
 
-from pychroot.scripts import run, pychroot as script_module
+from pychroot import __title__ as project
+from pychroot.scripts import run
+from pychroot.scripts.pychroot import argparser
 from pychroot.base import Chroot
 
 
 def test_arg_parsing():
     """Various argparse checks."""
-    pychroot = Tool(script_module)
+    pychroot = Tool(argparser)
 
     # no mounts
     orig_default_mounts = Chroot.default_mounts.copy()
@@ -56,7 +58,7 @@ def test_arg_parsing():
 
 def test_cli(capfd):
     """Various command line interaction checks."""
-    pychroot = Tool(script_module)
+    pychroot = Tool(argparser)
 
     # no args
     ret = pychroot([])
@@ -104,7 +106,6 @@ def test_cli(capfd):
 
 def test_script_run(capfd):
     """Test regular code path for running scripts."""
-    project = script_module.__name__.split('.')[0]
     script = partial(run, project)
 
     with patch('{}.scripts.import_module'.format(project)) as import_module:
