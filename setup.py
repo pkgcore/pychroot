@@ -14,16 +14,11 @@ test_requirements = ['pytest']
 if sys.hexversion < 0x03030000:
     test_requirements.append('mock')
 
-with open('README.rst', 'r', encoding='utf-8') as f:
-    readme = f.read()
-with open('NEWS.rst', 'r', encoding='utf-8') as f:
-    news = f.read()
-
 setup(
-    name='pychroot',
+    name=pkgdist.PROJECT,
     version=pkgdist.version(),
     description='a python library and cli tool that simplify chroot handling',
-    long_description=readme + '\n\n' + news,
+    long_description=pkgdist.readme(),
     author='Tim Harder',
     author_email='radhermit@gmail.com',
     url='https://github.com/pkgcore/pychroot',
