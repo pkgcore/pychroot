@@ -926,6 +926,10 @@ class pytest(Command):
             except ImportError:
                 raise DistutilsExecError('install pytest-cov for coverage support')
 
+            coveragerc = os.path.join(TOPDIR, '.coveragerc')
+            if os.path.exists(coveragerc):
+                self.test_args.extend(['--cov-config', coveragerc])
+
             if self.report is None:
                 # disable coverage report output
                 self.test_args.extend(['--cov-report='])
@@ -958,11 +962,7 @@ class pytest(Command):
             build_py.ensure_finalized()
             self.run_command('build_ext')
             self.run_command('build_py')
-
             builddir = os.path.abspath(build_py.build_lib)
-            if self.coverage and os.path.exists(os.path.join(TOPDIR, '.coveragerc')):
-                shutil.copyfile(os.path.join(TOPDIR, '.coveragerc'),
-                                os.path.join(builddir, '.coveragerc'))
 
         sys.path.insert(0, builddir)
         from snakeoil.contexts import chdir
