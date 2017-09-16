@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+pychroot 0.9.17 (2017-09-??)
+----------------------------
+
+- Handle single file bind mount creation failures.
+
 pychroot 0.9.16 (2016-10-31)
 ----------------------------
 
