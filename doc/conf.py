@@ -255,7 +255,7 @@ generated_man_pages = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('man/%s' % script, script, import_module(module).__doc__.split('\n', 1)[0], authors_list, 1)
+    ('man/%s' % script, script, import_module(module).__doc__.strip().split('\n', 1)[0], authors_list, 1)
     for module, script in generated_man_pages
 ]
 
