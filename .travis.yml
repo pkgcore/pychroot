@@ -18,10 +18,11 @@ cache:
   directories:
     - $HOME/.cache/pip
 install:
-  - pip install --upgrade pip
-  - pip install --only-binary ":all:" tox codecov
+  - pip install -U pip
 before_script: git clone https://github.com/pkgcore/pkgdist.git
 script:
+  - cp -av pkgdist/requirements/* requirements/
+  - pip install -r requirements/ci.txt
   - tox -e travis
   - pkgdist/build-dist-files.sh
 after_success:
