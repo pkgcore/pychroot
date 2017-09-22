@@ -15,7 +15,7 @@ if sys.hexversion < 0x03030000:
     test_requirements.append('mock')
 
 setup(
-    name=pkgdist.PROJECT,
+    name=pkgdist.MODULE,
     version=pkgdist.version(),
     description='a python library and cli tool that simplify chroot handling',
     long_description=pkgdist.readme(),
