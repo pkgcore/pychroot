@@ -43,32 +43,36 @@ READTHEDOCS = os.environ.get('READTHEDOCS', None) == 'True'
 TOPDIR = os.path.dirname(os.path.abspath(__file__))
 
 
-def find_project(topdir=TOPDIR):
-    """Determine a project's name.
+def find_projectdir(searchdir=TOPDIR):
+    """Determine a project's directory path.
 
     Based on the assumption that the project is only distributing one main
     module.
     """
-    topdir_depth = len(topdir.split('/'))
     modules = []
-    project = None
+    projectdir = None
+
+    src_dir = os.path.join(TOPDIR, 'src')
+    if os.path.exists(src_dir):
+        searchdir = src_dir
+    searchdir_depth = len(searchdir.split('/'))
 
     # look for a top-level module
-    for root, dirs, files in os.walk(topdir):
+    for root, dirs, files in os.walk(searchdir):
         # only descend at most one level
-        if len(root.split('/')) > topdir_depth + 1:
+        if len(root.split('/')) > searchdir_depth + 1:
             continue
         if '__init__.py' in files:
-            modules.append(os.path.basename(root))
+            modules.append(root)
 
     if len(modules) == 1:
-        project = modules[0]
+        projectdir = modules[0]
     elif len(modules) > 1:
         # Multiple modules found in the base directory, searching for one that
         # defines __title__.
         projects = []
-        for m in modules:
-            with io.open(os.path.join(topdir, m, '__init__.py'), encoding='utf-8') as f:
+        for path in modules:
+            with io.open(os.path.join(path, '__init__.py'), encoding='utf-8') as f:
                 try:
                     projects.append(re.search(
                         r'^__title__\s*=\s*[\'"]([^\'"]*)[\'"]',
@@ -78,20 +82,24 @@ def find_project(topdir=TOPDIR):
 
         if not projects or len(projects) > 1:
             raise ValueError(
-                'Multiple project modules found in %r: %s' % (topdir, ', '.join(modules)))
+                'Multiple project modules found in %r: %s' % (
+                    searchdir, ', '.join(os.path.basename(x) for x in modules)))
         else:
-            project = projects[0]
+            projectdir = projects[0]
 
-    if project is None:
+    if projectdir is None:
         raise ValueError('No project module found')
-    return project
+
+    return projectdir
 
 
 # determine the project we're being imported into
-PROJECT = find_project()
+PROJECTDIR = find_projectdir() 
+MODULEDIR = os.path.dirname(PROJECTDIR)
+PROJECT = os.path.basename(PROJECTDIR)
 
 
-def version(project=PROJECT):
+def version(projectdir=PROJECTDIR):
     """Determine a project's version.
 
     Based on the assumption that a project defines __version__ in its main
@@ -99,7 +107,7 @@ def version(project=PROJECT):
     """
     version = None
     try:
-        with io.open(os.path.join(TOPDIR, project, '__init__.py'), encoding='utf-8') as f:
+        with io.open(os.path.join(projectdir, '__init__.py'), encoding='utf-8') as f:
             version = re.search(
                 r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
                 f.read(), re.MULTILINE).group(1)
@@ -110,16 +118,16 @@ def version(project=PROJECT):
             raise
 
     if version is None:
-        raise RuntimeError('Cannot find version for project: %s' % (project,))
+        raise RuntimeError('Cannot find version for project: %s' % (PROJECT,))
 
     return version
 
 
-def readme(project=PROJECT):
+def readme(topdir=TOPDIR):
     """Determine a project's long description."""
     for doc in ('README.rst', 'README'):
         try:
-            with io.open(os.path.join(TOPDIR, doc), encoding='utf-8') as f:
+            with io.open(os.path.join(topdir, doc), encoding='utf-8') as f:
                 return f.read()
         except IOError as e:
             if e.errno == errno.ENOENT:
@@ -238,8 +246,6 @@ class OptionalExtension(Extension):
 class sdist(dst_sdist.sdist):
     """sdist command wrapper to bundle generated files for release."""
 
-    package_namespace = PROJECT
-
     def initialize_options(self):
         dst_sdist.sdist.initialize_options(self)
 
@@ -254,7 +260,7 @@ class sdist(dst_sdist.sdist):
         data = get_git_version(base_dir)
         if not data:
             return
-        path = os.path.join(base_dir, self.package_namespace, '_verinfo.py')
+        path = os.path.join(base_dir, '_verinfo.py')
         with open(path, 'w') as f:
             f.write('version_info=%r' % (data,))
 
@@ -274,7 +280,10 @@ class sdist(dst_sdist.sdist):
                             os.path.join(base_dir, build_man.content_search_path[1]))
 
         dst_sdist.sdist.make_release_tree(self, base_dir, files)
-        self.generate_verinfo(base_dir)
+        build_py = self.reinitialize_command('build_py')
+        build_py.ensure_finalized()
+        self.generate_verinfo(os.path.join(
+            base_dir, build_py.package_dir[''], build_py.package_namespace))
 
     def run(self):
         build_ext = self.reinitialize_command('build_ext')
@@ -333,12 +342,13 @@ class build_py2to3(build_py):
 
     def _compute_rebuilds(self, force=False):
         for base, mod_name, path in self.find_all_modules():
+            stripped_path = path.lstrip(self.package_dir['']).lstrip(os.path.sep)
             try:
                 new_mtime = math.floor(os.lstat(path).st_mtime)
             except EnvironmentError:
                 # ok... wtf distutils?
                 continue
-            trg_path = os.path.join(self.build_lib, path)
+            trg_path = os.path.join(self.build_lib, stripped_path)
             if force:
                 yield trg_path, new_mtime
                 continue
@@ -929,8 +939,8 @@ class pytest(Command):
         if self.test_dir is None:
             for path in (os.path.join(TOPDIR, 'test'),
                          os.path.join(TOPDIR, 'tests'),
-                         os.path.join(TOPDIR, PROJECT, 'test'),
-                         os.path.join(TOPDIR, PROJECT, 'tests')):
+                         os.path.join(PROJECTDIR, 'test'),
+                         os.path.join(PROJECTDIR, 'tests')):
                 if os.path.exists(path):
                     self.test_dir = path
                     break
@@ -979,7 +989,7 @@ class pytest(Command):
             raise DistutilsExecError('pytest is not installed')
 
         if self.skip_build:
-            builddir = TOPDIR
+            builddir = MODULEDIR
         else:
             # build extensions and byte-compile python
             build_ext = self.reinitialize_command('build_ext')
@@ -1015,7 +1025,6 @@ class pylint(Command):
         self.errors_only = bool(self.errors_only)
 
     def run(self):
-        print(self.output_format)
         try:
             from pylint import lint
         except ImportError:

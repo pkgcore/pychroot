@@ -26,7 +26,5 @@ script:
   - tox -e travis
   - pkgdist/build-dist-files.sh
 after_success:
-  # upload coverage data
-  - pushd .tox/travis/lib/python*/site-packages
+  - tox -e coverage-report
   - codecov
-  - popd

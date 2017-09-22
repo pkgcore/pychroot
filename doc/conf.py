@@ -25,7 +25,7 @@ import sys
 libdir = os.path.abspath(os.path.join('..', 'build', 'lib'))
 if os.path.exists(libdir):
     sys.path.insert(0, libdir)
-sys.path.insert(1, os.path.abspath('..'))
+sys.path.insert(1, os.path.abspath(os.path.join('..', 'src')))
 
 from pychroot import __version__
 
