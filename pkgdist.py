@@ -138,6 +138,20 @@ def readme(topdir=TOPDIR):
     return None
 
 
+def install_requires(topdir=TOPDIR):
+    """Determine a project's runtime dependencies."""
+    try:
+        with io.open(os.path.join(topdir, 'requirements', 'release.txt')) as f:
+            return f.read().splitlines()
+    except IOError as e:
+        if e.errno == errno.ENOENT:
+            pass
+        else:
+            raise
+
+    return None
+
+
 def get_file_paths(path):
     """Get list of all file paths under a given path."""
     for root, dirs, files in os.walk(path):
