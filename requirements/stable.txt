@@ -1,3 +1,2 @@
 -r release.txt
-
-sphinx
+-r test.txt
