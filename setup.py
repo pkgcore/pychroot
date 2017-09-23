@@ -10,10 +10,6 @@ from setuptools import setup, Command, find_packages
 import pkgdist
 
 
-test_requirements = ['pytest']
-if sys.hexversion < 0x03030000:
-    test_requirements.append('mock')
-
 setup(
     name=pkgdist.MODULE,
     version=pkgdist.version(),
@@ -27,7 +23,7 @@ setup(
     package_dir={'':'src'},
     scripts=os.listdir('bin'),
     install_requires=pkgdist.install_requires(),
-    tests_require=test_requirements,
+    tests_require=pkgdist.test_requires(),
     platforms='Posix',
     cmdclass={
         'build_py': pkgdist.build_py2to3,

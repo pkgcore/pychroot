@@ -137,18 +137,27 @@ def readme(topdir=TOPDIR):
     return None
 
 
-def install_requires(topdir=TOPDIR):
-    """Determine a project's runtime dependencies."""
+def _requires(path):
+    """Determine a project's various dependencies from requirements files."""
     try:
-        with io.open(os.path.join(topdir, 'requirements', 'release.txt')) as f:
+        with io.open(path) as f:
             return f.read().splitlines()
     except IOError as e:
         if e.errno == errno.ENOENT:
             pass
         else:
             raise
-
     return None
+
+
+def install_requires():
+    """Determine a project's runtime dependencies."""
+    return _requires(os.path.join(TOPDIR, 'requirements', 'install.txt'))
+
+
+def test_requires():
+    """Determine a project's test dependencies."""
+    return _requires(os.path.join(TOPDIR, 'requirements', 'test.txt'))
 
 
 def get_file_paths(path):
