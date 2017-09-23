@@ -145,9 +145,8 @@ def setup():
         'version': version(),
         'long_description': readme(),
         'packages': find_packages(MODULEDIRNAME),
-        'package_dir': {'':MODULEDIRNAME},
+        'package_dir': {'':os.path.basename(MODULEDIRNAME)},
         'install_requires': install_requires(),
-        'tests_require': test_requires(),
     }
 
     cmds = {

@@ -12,6 +12,7 @@ setup(
     url='https://github.com/pkgcore/pychroot',
     license='BSD',
     platforms='Posix',
+    tests_require=pkgdist.test_requires(),
     cmdclass=dict(
         build_py=pkgdist.build_py2to3,
         test=pkgdist.pytest,
