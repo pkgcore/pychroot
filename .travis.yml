@@ -24,18 +24,36 @@ script:
   - cp -R pkgdist/requirements/* requirements/
   - pip install -r requirements/ci.txt
   - tox -e travis
-  - pkgdist/build-dist-files.sh
 after_success:
+  # upload coverage data
   - tox -e coverage-report
   - codecov
 
-# push release tarballs to github
-deploy:
-  provider: releases
-  api_key:
-    secure: EjlnW6QmwE1eUNRdA5ImhjZKXecxEe8g2J+gENMn2T6Ey1STLyDDCgmubiccuwBCUVuz7vl5Qj7qBkiqbXaqMAiDc3r//XSoQAt8LgFsGCAflk+YaNwtTKWyQJX3IXKf3HkDCnb9AqQVseeyHqZKfbOzHkS0CB1nOIJip2clGII=
-  file_glob: true
-  file: dist/pychroot-*.tar.gz
-  skip_cleanup: true
-  on:
-    tags: true
+stages:
+  - test
+  - name: deploy
+    if: branch = master
+    if: type IN (push, api)
+    if: tag IS present
+
+jobs:
+  include:
+    # push tarball and wheels to pypi
+    - stage: deploy
+      python: 3.6
+      script: pkgdist/build-dist-files.sh
+    # push tarball to github
+    - stage: deploy
+      python: 3.6
+      script:
+        - pip install requirements/build.txt
+        - python setup.py sdist
+      deploy:
+        provider: releases
+        api_key:
+          secure: EjlnW6QmwE1eUNRdA5ImhjZKXecxEe8g2J+gENMn2T6Ey1STLyDDCgmubiccuwBCUVuz7vl5Qj7qBkiqbXaqMAiDc3r//XSoQAt8LgFsGCAflk+YaNwtTKWyQJX3IXKf3HkDCnb9AqQVseeyHqZKfbOzHkS0CB1nOIJip2clGII=
+        file_glob: true
+        file: dist/pychroot-*.tar.gz
+        skip_cleanup: true
+        on:
+          tags: true
