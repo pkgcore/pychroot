@@ -1,0 +1,2 @@
+# deps required to build sdist and/or run setuptools script
+snakeoil>=0.7.2
