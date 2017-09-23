@@ -1,7 +1,7 @@
 [run]
 source = pychroot
 branch = True
-omit = */pychroot/_verinfo.py
+omit = */_verinfo.py
 
 [paths]
 source =
