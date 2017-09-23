@@ -1,4 +1,1 @@
--r build.txt
--r tox.txt
-
 https://github.com/pkgcore/snakeoil/archive/master.tar.gz#egg=snakeoil
