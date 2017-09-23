@@ -477,6 +477,7 @@ class build_man(Command):
     2to3 or other conversions instead of straight from the build directory.
     """
 
+    description = "build man pages"
     user_options = [
         ("force", "f", "force build as needed"),
     ]
@@ -522,6 +523,7 @@ class build_man(Command):
 class build_docs(build_man):
     """Build html docs."""
 
+    description = "build HTML documentation"
     user_options = [
         ("force", "f", "force build as needed"),
     ]
@@ -715,6 +717,7 @@ class install_docs(Command):
     """Install html documentation."""
 
     content_search_path = build_docs.content_search_path
+    description = "install HTML documentation"
     user_options = [
         ('path=', None, "final path to install to; else it's calculated"),
         ('build-dir=', None, "build directory"),
@@ -797,6 +800,7 @@ class install_docs(Command):
 class install_man(install_docs):
     """Install man pages."""
 
+    description = "install man pages"
     content_search_path = build_man.content_search_path
     build_command = 'build_man'
 
@@ -851,6 +855,7 @@ class test(Command):
 
     blacklist = frozenset()
 
+    description = "run unit tests in a built copy"
     user_options = [
         ("inplace", "i", "do building/testing in place"),
         ("skip-rebuilding", "s", "skip rebuilds. primarily for development"),
@@ -937,6 +942,7 @@ class test(Command):
 class pytest(Command):
     """Run tests using pytest."""
 
+    description = "run unit tests in a built copy using pytest"
     user_options = [
         ('pytest-args=', 'a', 'arguments to pass to py.test'),
         ('coverage', 'c', 'generate coverage info'),
@@ -1034,6 +1040,7 @@ class pytest(Command):
 class pylint(Command):
     """Run pylint on a module."""
 
+    description = "run pylint on a module"
     user_options = [
         ('errors-only', 'E', 'Check only errors with pylint'),
         ('output-format=', 'f', 'Change the output format'),
