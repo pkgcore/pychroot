@@ -542,7 +542,7 @@ class build_docs(build_man):
 
             # generate API docs
             from snakeoil.dist.generate_docs import generate_html
-            generate_html(MODULE, TOPDIR)
+            generate_html(MODULE, MODULEDIRNAME)
 
             # generate html docs -- allow build_sphinx cmd to run again
             build_sphinx = self.reinitialize_command('build_sphinx')
