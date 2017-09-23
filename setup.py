@@ -1,41 +1,23 @@
 #!/usr/bin/env python
 
-from io import open
-import os
-import subprocess
-import sys
-
-from setuptools import setup, Command, find_packages
+from setuptools import setup
 
 import pkgdist
-
+pkgdist_setup, pkgdist_cmds = pkgdist.setup()
 
 setup(
-    name=pkgdist.MODULE,
-    version=pkgdist.version(),
     description='a python library and cli tool that simplify chroot handling',
-    long_description=pkgdist.readme(),
     author='Tim Harder',
     author_email='radhermit@gmail.com',
     url='https://github.com/pkgcore/pychroot',
     license='BSD',
-    packages=find_packages('src'),
-    package_dir={'':'src'},
-    scripts=os.listdir('bin'),
-    install_requires=pkgdist.install_requires(),
-    tests_require=pkgdist.test_requires(),
     platforms='Posix',
-    cmdclass={
-        'build_py': pkgdist.build_py2to3,
-        'build_scripts': pkgdist.build_scripts,
-        'build_man': pkgdist.build_man,
-        'build_docs': pkgdist.build_docs,
-        'install_man': pkgdist.install_man,
-        'install_docs': pkgdist.install_docs,
-        'sdist': pkgdist.sdist,
-        'test': pkgdist.pytest,
-        'lint': pkgdist.pylint,
-    },
+    cmdclass=dict(
+        build_py=pkgdist.build_py2to3,
+        test=pkgdist.pytest,
+        lint=pkgdist.pylint,
+        **pkgdist_cmds
+    ),
     classifiers=(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
@@ -44,4 +26,5 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ),
+    **pkgdist_setup
 )
