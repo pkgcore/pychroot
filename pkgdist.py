@@ -10,6 +10,7 @@ passing in distutils.
 Specifically, this module is only meant to be imported in setup.py scripts.
 """
 
+from contextlib import contextmanager
 import copy
 import errno
 import io
@@ -95,7 +96,7 @@ def find_moduledir(searchdir=TOPDIR):
 
 
 # determine the main module we're being used to package
-MODULEDIR = find_moduledir() 
+MODULEDIR = find_moduledir()
 MODULEDIRNAME = os.path.dirname(MODULEDIR)
 MODULE = os.path.basename(MODULEDIR)
 
@@ -333,7 +334,9 @@ class sdist(dst_sdist.sdist):
         exist in a working tree.
         """
 
-        if 'build_man' in self.distribution.cmdclass:
+        # don't build man pages when running under tox
+        if ('build_man' in self.distribution.cmdclass and
+                not os.path.basename(os.environ.get('_', '')) == 'tox'):
             build_man = self.reinitialize_command('build_man')
             build_man.ensure_finalized()
             self.run_command('build_man')
@@ -382,7 +385,8 @@ class build_py(dst_build_py.build_py):
             self.build_lib, (MODULE,), '_verinfo')
         # this should check mtime...
         if not os.path.exists(ver_path):
-            from snakeoil.version import get_git_version
+            with syspath(MODULEDIRNAME, MODULE == 'snakeoil'):
+                from snakeoil.version import get_git_version
             log.info('generating _verinfo')
             with open(ver_path, 'w') as f:
                 f.write("version_info=%r" % (get_git_version('.'),))
@@ -426,7 +430,8 @@ class build_py2to3(build_py):
 
     def get_py2to3_converter(self, options=None, proc_count=0):
         from lib2to3 import refactor as ref_mod
-        from snakeoil.dist import caching_2to3
+        with syspath(MODULEDIRNAME, MODULE == 'snakeoil'):
+            from snakeoil.dist import caching_2to3
 
         if proc_count == 0:
             proc_count = cpu_count()
@@ -543,20 +548,17 @@ class build_man(Command):
             build_py = self.reinitialize_command('build_py')
             build_py.ensure_finalized()
             self.run_command('build_py')
-            syspath = sys.path[:]
-            sys.path.insert(0, os.path.abspath(build_py.build_lib))
+            with syspath(os.path.abspath(build_py.build_lib)):
+                # generate man page content for scripts we create
+                if 'build_scripts' in self.distribution.cmdclass:
+                    from snakeoil.dist.generate_docs import generate_man
+                    generate_man(MODULE, TOPDIR)
 
-            # generate man page content for scripts we create
-            if 'build_scripts' in self.distribution.cmdclass:
-                from snakeoil.dist.generate_docs import generate_man
-                generate_man(MODULE, TOPDIR)
-
-            # generate man pages
-            build_sphinx = self.reinitialize_command('build_sphinx')
-            build_sphinx.builder = 'man'
-            build_sphinx.ensure_finalized()
-            self.run_command('build_sphinx')
-            sys.path = syspath
+                # generate man pages
+                build_sphinx = self.reinitialize_command('build_sphinx')
+                build_sphinx.builder = 'man'
+                build_sphinx.ensure_finalized()
+                self.run_command('build_sphinx')
 
 
 class build_docs(build_man):
@@ -1067,12 +1069,12 @@ class pytest(Command):
             self.run_command('build_py')
             builddir = os.path.abspath(build_py.build_lib)
 
-        sys.path.insert(0, builddir)
-        from snakeoil.contexts import chdir
-        # Change the current working directory to the builddir during testing
-        # so coverage paths are correct.
-        with chdir(builddir):
-            ret = pytest.main(self.test_args)
+        with syspath(builddir):
+            from snakeoil.contexts import chdir
+            # Change the current working directory to the builddir during testing
+            # so coverage paths are correct.
+            with chdir(builddir):
+                ret = pytest.main(self.test_args)
         sys.exit(ret)
 
 
@@ -1178,7 +1180,8 @@ class config(dst_config.config):
         return self.try_link("int main(int argc, char *argv[]) { return 0; }")
 
     def run(self):
-        from snakeoil.pickling import dump, load
+        with syspath(MODULEDIRNAME, MODULE == 'snakeoil'):
+            from snakeoil.pickling import dump, load
 
         # try to load the cached results
         try:
@@ -1224,6 +1227,23 @@ class config(dst_config.config):
         return self.try_compile(
             'int main() { %s x; (void) x.%s; return 0; }'
             % (typename, member), headers, include_dirs, lang)
+
+
+@contextmanager
+def syspath(path, condition=True):
+    """Context manager that mangles sys.path and then reverts on exit.
+
+    Args:
+        path: The directory path to add to sys.path.
+        condition: Optional boolean that decides whether sys.path is mangled or not.
+    """
+    syspath = sys.path[:]
+    if condition:
+        sys.path.insert(0, path)
+    try:
+        yield
+    finally:
+        sys.path = syspath
 
 
 # yes these are in snakeoil.compatibility; we can't rely on that module however
