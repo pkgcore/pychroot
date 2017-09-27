@@ -11,7 +11,7 @@ install:
   - pip install -U pip
 before_script: 
   - git clone https://github.com/pkgcore/pkgdist.git
-  - cp -av pkgdist/requirements/* requirements/
+  - cp -R pkgdist/requirements/* requirements/
   - pip install -r requirements/ci.txt
 script: tox -e travis
 after_success:
@@ -42,17 +42,19 @@ jobs:
         - CIBW_BEFORE_BUILD="{pip} install -r requirements/wheel.txt"
       before_script:
         - git clone https://github.com/pkgcore/pkgdist.git
-        - cp -av pkgdist/requirements/* requirements/
+        - cp -R pkgdist/requirements/* requirements/
       script: ./pkgdist/build-dist-files.sh
+      after_success:
 
     # push tarball to github
     - stage: deploy
       python: 3.6
       before_script:
         - git clone https://github.com/pkgcore/pkgdist.git
-        - cp -av pkgdist/requirements/* requirements/
+        - cp -R pkgdist/requirements/* requirements/
         - pip install -r requirements/docs.txt
       script: python setup.py sdist
+      after_success:
       deploy:
         provider: releases
         api_key:
