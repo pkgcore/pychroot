@@ -128,7 +128,7 @@ def _validate_args(parser, namespace):
 def main(options, out, err):
     try:
         with Chroot(options.path, mountpoints=options.mountpoints,
-                    hostname=options.hostname, skip_chdir=options.skip_chdir):
+                    hostname=options.hostname, skip_chdir=options.skip_chdir) as c:
             os.execvp(options.command[0], options.command)
     except EnvironmentError as e:
         if (e.errno == errno.ENOENT):
@@ -138,4 +138,4 @@ def main(options, out, err):
     except ChrootError as e:
         argparser.error(str(e), status=1)
 
-    return 0
+    return c.exit_status

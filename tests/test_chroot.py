@@ -32,7 +32,7 @@ def test_Chroot():
             mock.patch('os.remove') as remove, \
             mock.patch('os._exit'), \
             mock.patch('os.path.exists') as exists, \
-            mock.patch('os.waitpid'), \
+            mock.patch('os.waitpid', return_value=(0, 0)), \
             mock.patch('pychroot.utils.mount'), \
             mock.patch('pychroot.base.simple_unshare'):
 
