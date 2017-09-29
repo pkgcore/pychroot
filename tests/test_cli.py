@@ -112,7 +112,7 @@ def test_script_run(capfd):
         import_module.side_effect = ImportError("baz module doesn't exist")
 
         # default error path when script import fails
-        with patch('sys.argv', []):
+        with patch('sys.argv', [project]):
             with raises(SystemExit) as excinfo:
                 script()
             assert excinfo.value.code == 1
@@ -124,7 +124,7 @@ def test_script_run(capfd):
             assert err[2] == "Add --debug to the commandline for a traceback."
 
         # running with --debug should raise an ImportError when there are issues
-        with patch('sys.argv', ['script', '--debug']):
+        with patch('sys.argv', [project, '--debug']):
             with raises(ImportError):
                 script()
             out, err = capfd.readouterr()
@@ -136,7 +136,7 @@ def test_script_run(capfd):
         import_module.reset_mock()
 
     # no args
-    with patch('sys.argv', []):
+    with patch('sys.argv', [project]):
         with raises(SystemExit) as excinfo:
             script()
         assert excinfo.value.code == 2
