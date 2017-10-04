@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+pychroot 0.9.18 (2017-10-04)
+----------------------------
+
+- Return the exit status of the child process instead of 0 for the pychroot
+  script. This makes pychroot more compatible with chroot's behavior.
+
+- Run clean up before exit after receiving SIGINT/SIGTERM, previously stub
+  files/directories that were created for bind mounts weren't properly cleaned
+  up in the chroot after the parent process received these signals and exited.
+
 pychroot 0.9.17 (2017-09-21)
 ----------------------------
 
