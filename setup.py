@@ -14,10 +14,10 @@ setup(
     platforms='Posix',
     tests_require=pkgdist.test_requires(),
     cmdclass=dict(
+        pkgdist_cmds,
         build_py=pkgdist.build_py2to3,
         test=pkgdist.pytest,
         lint=pkgdist.pylint,
-        **pkgdist_cmds
     ),
     classifiers=(
         'Intended Audience :: Developers',
