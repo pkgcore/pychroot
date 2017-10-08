@@ -40,18 +40,17 @@ class Chroot(SplitExec):
     }
 
     def __init__(self, path, log=None, mountpoints=None, hostname=None, skip_chdir=False):
-        self.log = getlogger(log, __name__)
-
-        if not os.path.isdir(os.path.abspath(path)):
-            raise ChrootError(
-                "cannot change root directory to '{}'".format(path), errno.ENOTDIR)
-
         super(Chroot, self).__init__()
+        self.log = getlogger(log, __name__)
         self.path = os.path.abspath(path)
         self.hostname = hostname
         self.skip_chdir = skip_chdir
         self.mountpoints = self.default_mounts.copy()
         self.mountpoints.update(mountpoints if mountpoints else {})
+
+        if not os.path.isdir(self.path):
+            raise ChrootError(
+                "cannot change root directory to '{}'".format(path), errno.ENOTDIR)
 
         # flag mount points that require creation and removal
         for k, source, chrmount, opts in self.mounts:
