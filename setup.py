@@ -5,7 +5,7 @@ from setuptools import setup
 import pkgdist
 pkgdist_setup, pkgdist_cmds = pkgdist.setup()
 
-setup(
+setup(**dict(pkgdist_setup,
     description='a python library and cli tool that simplify chroot handling',
     author='Tim Harder',
     author_email='radhermit@gmail.com',
@@ -18,7 +18,7 @@ setup(
         build_py=pkgdist.build_py2to3,
         test=pkgdist.pytest,
         lint=pkgdist.pylint,
-    ),
+        ),
     classifiers=(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
@@ -26,6 +26,6 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-    ),
-    **pkgdist_setup
+        ),
+    )
 )
