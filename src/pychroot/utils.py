@@ -8,10 +8,10 @@ import logging
 import operator
 import os
 
-from pychroot.exceptions import ChrootMountError
-
 from snakeoil.fileutils import touch
 from snakeoil.osutils.mount import mount, MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY
+
+from .exceptions import ChrootMountError
 
 
 def dictbool(dct, key):

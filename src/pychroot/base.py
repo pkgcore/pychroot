@@ -3,11 +3,11 @@ from __future__ import unicode_literals
 import errno
 import os
 
-from pychroot.exceptions import ChrootError, ChrootMountError
-from pychroot.utils import bind, getlogger, dictbool
-
 from snakeoil.contexts import SplitExec
 from snakeoil.process.namespaces import simple_unshare
+
+from .exceptions import ChrootError, ChrootMountError
+from .utils import bind, getlogger, dictbool
 
 
 class Chroot(SplitExec):

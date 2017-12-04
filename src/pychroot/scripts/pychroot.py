@@ -23,10 +23,10 @@ from functools import partial
 import os
 import sys
 
-from pychroot.base import Chroot
-from pychroot.exceptions import ChrootError
-
 from snakeoil.cli import arghparse
+
+from ..base import Chroot
+from ..exceptions import ChrootError
 
 
 def bindmount(s, recursive=False, readonly=False):
