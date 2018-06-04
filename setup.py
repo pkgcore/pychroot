@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from setuptools import setup
 
@@ -15,14 +15,12 @@ setup(**dict(pkgdist_setup,
     tests_require=pkgdist.test_requires(),
     cmdclass=dict(
         pkgdist_cmds,
-        build_py=pkgdist.build_py2to3,
         test=pkgdist.pytest,
         lint=pkgdist.pylint,
         ),
     classifiers=(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
