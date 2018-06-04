@@ -1,7 +1,5 @@
 """Various chroot-related utilities mostly dealing with bind mounting."""
 
-from __future__ import unicode_literals
-
 import errno
 from functools import reduce  # pylint: disable=redefined-builtin
 import logging

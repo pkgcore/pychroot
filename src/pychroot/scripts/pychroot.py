@@ -15,8 +15,6 @@ This allows a user to easily set up a custom chroot environment without having
 to resort to scripted mount handling or other methods.
 """
 
-from __future__ import absolute_import, unicode_literals
-
 import argparse
 import errno
 from functools import partial

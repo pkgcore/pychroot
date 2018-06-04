@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import errno
 import os
 
@@ -79,7 +77,7 @@ class Chroot(SplitExec):
 
     @property
     def mounts(self):
-        for k, options in list(self.mountpoints.iteritems()):
+        for k, options in list(self.mountpoints.items()):
             source, _, dest = k.partition(':')
             if not dest:
                 dest = source
