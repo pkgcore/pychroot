@@ -2,8 +2,9 @@
 
 from setuptools import setup
 
-import pkgdist
+from snakeoil.dist import distutils_extensions as pkgdist
 pkgdist_setup, pkgdist_cmds = pkgdist.setup()
+
 
 setup(**dict(pkgdist_setup,
     description='a python library and cli tool that simplify chroot handling',
