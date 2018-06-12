@@ -114,8 +114,6 @@ individually via::
 
     tox
 
-Note that mock_ is required for tests when using python-2.7.
-
 
 .. _`issue tracker`: https://github.com/pkgcore/pychroot/issues
 .. _`snakeoil`: https://github.com/pkgcore/snakeoil
