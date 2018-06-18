@@ -2,9 +2,9 @@
 pychroot
 ========
 
-.. include:: ../generated/pychroot/main_synopsis.rst
-.. include:: ../generated/pychroot/main_description.rst
-.. include:: ../generated/pychroot/main_options.rst
+.. include:: ../generated/pychroot/_synopsis.rst
+.. include:: ../generated/pychroot/_description.rst
+.. include:: ../generated/pychroot/_options.rst
 
 Example Usage
 =============
