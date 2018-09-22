@@ -1,13 +1,4 @@
 language: python
-python:
-  - 3.4
-  - 3.5
-  - 3.6
-  - 3.7-dev
-matrix:
-  fast_finish: true
-  allow_failures:
-  - python: 3.7-dev
 cache:
   pip: true
   directories:
@@ -30,42 +21,51 @@ stages:
   - name: deploy
     if: (type IN (api, cron)) OR (branch IN (travis-ci, deploy)) OR (branch = master AND type IN (push, api) AND tag IS present)
 
-jobs:
+matrix:
   include:
-    # push tarball and wheels to pypi
-    - stage: deploy
-      python: 3.6
-      sudo: required
-      services:
-        - docker
-      env:
-        - secure: bJUK+FEBax3oKhFwwAbTFbMKUpicZKjonddgMUaXrFWE0V8Mm8tL2dPBAvjOZD5xpz5YEqnspJR34VjvHVc7QwwJ+M/KECB2olh4z/CKUi5OLiQd65chHaMSRyXOveAEEeoLCbXC0UzlydpWfBQtxKUX75cFHO8FOphQE+ruoFU=
-        - secure: Kb6Fb2EX9skkftvy63SDTCQSazBhn2RFVxYkSy9K1l0+qzi7dujalMuEVCwWZei6WdvpemzIvRx2lNM7Az5mOollTmLTSAUlcaaDNbO+vn4YJmXzgFoDELd+YZp1nRT1Aears/EK0P+uoAILOBfEm3kc/b7sql3upjit+khjHko=
-        - CIBW_PLATFORM=linux
-        - CIBW_SKIP="cp26-* cp33-*"
-        - CIBW_BEFORE_BUILD="{pip} install -r requirements/wheel.txt -r requirements/test.txt"
-        - CIBW_TEST_COMMAND="py.test {project}/test"
-      before_script:
-        - git clone https://github.com/pkgcore/pkgdist.git
-        - cp -R pkgdist/requirements/* requirements/
-      script: pkgdist/build-dist-files.sh
-      after_success:
+    - python: 3.4
+    - python: 3.5
+    - python: 3.6
+    - python: 3.7
+      dist: xenial
+      sudo: true
+  fast_finish: true
 
-    # push tarball to github
-    - stage: deploy
-      python: 3.6
-      before_script:
-        - git clone https://github.com/pkgcore/pkgdist.git
-        - cp -R pkgdist/requirements/* requirements/
-        - pip install -r requirements/sdist.txt
-      script: python setup.py sdist
-      after_success: tar -ztf dist/*.tar.gz | sort
-      deploy:
-        provider: releases
-        api_key:
-          secure: EjlnW6QmwE1eUNRdA5ImhjZKXecxEe8g2J+gENMn2T6Ey1STLyDDCgmubiccuwBCUVuz7vl5Qj7qBkiqbXaqMAiDc3r//XSoQAt8LgFsGCAflk+YaNwtTKWyQJX3IXKf3HkDCnb9AqQVseeyHqZKfbOzHkS0CB1nOIJip2clGII=
-        file_glob: true
-        file: dist/*.tar.gz
-        skip_cleanup: true
-        on:
-          tags: true
+jobs:
+  # push tarball and wheels to pypi
+  - stage: deploy
+    python: 3.6
+    sudo: required
+    services:
+      - docker
+    env:
+      - secure: bJUK+FEBax3oKhFwwAbTFbMKUpicZKjonddgMUaXrFWE0V8Mm8tL2dPBAvjOZD5xpz5YEqnspJR34VjvHVc7QwwJ+M/KECB2olh4z/CKUi5OLiQd65chHaMSRyXOveAEEeoLCbXC0UzlydpWfBQtxKUX75cFHO8FOphQE+ruoFU=
+      - secure: Kb6Fb2EX9skkftvy63SDTCQSazBhn2RFVxYkSy9K1l0+qzi7dujalMuEVCwWZei6WdvpemzIvRx2lNM7Az5mOollTmLTSAUlcaaDNbO+vn4YJmXzgFoDELd+YZp1nRT1Aears/EK0P+uoAILOBfEm3kc/b7sql3upjit+khjHko=
+      - CIBW_PLATFORM=linux
+      - CIBW_SKIP="cp26-* cp33-*"
+      - CIBW_BEFORE_BUILD="{pip} install -r requirements/wheel.txt -r requirements/test.txt"
+      - CIBW_TEST_COMMAND="py.test {project}/test"
+    before_script:
+      - git clone https://github.com/pkgcore/pkgdist.git
+      - cp -R pkgdist/requirements/* requirements/
+    script: pkgdist/build-dist-files.sh
+    after_success:
+
+  # push tarball to github
+  - stage: deploy
+    python: 3.6
+    before_script:
+      - git clone https://github.com/pkgcore/pkgdist.git
+      - cp -R pkgdist/requirements/* requirements/
+      - pip install -r requirements/sdist.txt
+    script: python setup.py sdist
+    after_success: tar -ztf dist/*.tar.gz | sort
+    deploy:
+      provider: releases
+      api_key:
+        secure: EjlnW6QmwE1eUNRdA5ImhjZKXecxEe8g2J+gENMn2T6Ey1STLyDDCgmubiccuwBCUVuz7vl5Qj7qBkiqbXaqMAiDc3r//XSoQAt8LgFsGCAflk+YaNwtTKWyQJX3IXKf3HkDCnb9AqQVseeyHqZKfbOzHkS0CB1nOIJip2clGII=
+      file_glob: true
+      file: dist/*.tar.gz
+      skip_cleanup: true
+      on:
+        tags: true
