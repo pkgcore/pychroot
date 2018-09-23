@@ -87,5 +87,3 @@ def test_Chroot():
         with chroot:
             pass
         chdir.side_effect = None
-
-        mock.patch.stopall()
