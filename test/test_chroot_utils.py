@@ -3,11 +3,7 @@ import logging
 import os
 import shutil
 from tempfile import mkdtemp
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from pytest import raises
 from snakeoil.osutils.mount import MS_BIND, MS_REC, MS_REMOUNT, MS_RDONLY

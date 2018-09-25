@@ -2,10 +2,7 @@ import errno
 import os
 import shlex
 import tempfile
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
+from unittest.mock import patch
 
 from pytest import raises
 

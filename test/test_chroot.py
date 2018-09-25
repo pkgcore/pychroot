@@ -1,9 +1,6 @@
 from itertools import chain, cycle
+from unittest import mock
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 from pytest import raises
 
 from pychroot.base import Chroot
