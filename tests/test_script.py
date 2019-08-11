@@ -11,10 +11,12 @@ def test_script_run(capfd):
     """Test regular code path for running scripts."""
     script = partial(run, project)
 
-    with patch('{}.scripts.import_module'.format(project)) as import_module:
-        import_module.side_effect = ImportError("baz module doesn't exist")
-
-        # default error path when script import fails
+    with patch(f'{project}.scripts.import_module') as import_module:
+        import_exception = ImportError("baz module doesn't exist")
+        import_exception.__cause__ = Exception('cause of ImportError')
+        import_exception.__context__ = Exception('context of ImportError')
+        import_module.side_effect = import_exception
+        # explicitly handled ImportErrors don't show a backtrace
         with patch('sys.argv', [project]):
             with raises(SystemExit) as excinfo:
                 script()
@@ -23,19 +25,21 @@ def test_script_run(capfd):
             err = err.strip().split('\n')
             assert len(err) == 3
             assert err[0] == "Failed importing: baz module doesn't exist!"
-            assert err[1].startswith("Verify that {} and its deps".format(project))
+            assert err[1].startswith(f"Verify that {project} and its deps")
             assert err[2] == "Add --debug to the commandline for a traceback."
+        import_module.reset_mock()
 
-        # running with --debug should raise an ImportError when there are issues
-        with patch('sys.argv', [project, '--debug']):
-            with raises(ImportError):
-                script()
-            out, err = capfd.readouterr()
-            err = err.strip().split('\n')
-            assert len(err) == 2
-            assert err[0] == "Failed importing: baz module doesn't exist!"
-            assert err[1].startswith("Verify that {} and its deps".format(project))
-
+        import_module.side_effect = ImportError("baz module doesn't exist")
+        # import errors show backtrace for unhandled exceptions or when --debug is passed
+        for args in ([], ['--debug']):
+            with patch('sys.argv', [project] + args):
+                with raises(ImportError):
+                    script()
+                out, err = capfd.readouterr()
+                err = err.strip().split('\n')
+                assert len(err) == 2
+                assert err[0] == "Failed importing: baz module doesn't exist!"
+                assert err[1].startswith(f"Verify that {project} and its deps")
         import_module.reset_mock()
 
     # no args
@@ -44,4 +48,4 @@ def test_script_run(capfd):
             script()
         assert excinfo.value.code == 2
         out, err = capfd.readouterr()
-        assert err.startswith("{}: error: ".format(project))
+        assert err.startswith(f"{project}: error: ")
