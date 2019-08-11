@@ -57,6 +57,7 @@ def test_Chroot():
             chroot = Chroot('/', mountpoints={'$FAKEVAR:/fake/dest/path': {}})
         assert chroot.mountpoints['/fake/src/path'].get('create', False)
         exists.side_effect = None
+        exists.return_value = True
 
         # test parent process
         fork.return_value = 10
