@@ -47,8 +47,7 @@ class Chroot(SplitExec):
         self.mountpoints.update(mountpoints if mountpoints else {})
 
         if not os.path.isdir(self.path):
-            raise ChrootError(
-                "cannot change root directory to '{}'".format(path), errno.ENOTDIR)
+            raise ChrootError(f'cannot change root directory to {path!r}', errno.ENOTDIR)
 
         # flag mount points that require creation and removal
         for k, source, chrmount, opts in self.mounts:
@@ -65,8 +64,8 @@ class Chroot(SplitExec):
                         continue
                     else:
                         raise ChrootMountError(
-                            'cannot mount undefined environment variable: {}'.format(source))
-                self.log.debug('Expanding mountpoint "%s" to "%s"', source, src)
+                            f'cannot mount undefined environment variable: {source}')
+                self.log.debug('Expanding mountpoint %r to %r', source, src)
                 self.mountpoints[src] = opts
                 del self.mountpoints[k]
                 if '$' in chrmount:
@@ -117,7 +116,8 @@ class Chroot(SplitExec):
                 pass
             except Exception as e:
                 raise ChrootMountError(
-                    "failed to remove chroot mount point '{}'".format(chrmount), getattr(e, 'errno', None))
+                    f'failed to remove chroot mount point {chrmount!r}',
+                    getattr(e, 'errno', None))
 
     def _mount(self):
         """Do the bind mounts for this chroot object.

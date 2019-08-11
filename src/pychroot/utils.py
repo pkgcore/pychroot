@@ -88,22 +88,22 @@ def bind(src, dest, chroot, create=False, log=None, readonly=False,
                 touch(dest)
             except OSError as e:
                 raise ChrootMountError(
-                    "cannot bind mount to '{}'".format(dest), getattr(e, 'errno', None))
+                    f'cannot bind mount to {dest!r}', getattr(e, 'errno', None))
 
     if not os.path.exists(src) and src not in fstypes:
-        raise ChrootMountError("cannot bind mount from '{}'".format(src), errno.ENOENT)
+        raise ChrootMountError(f'cannot bind mount from {src!r}', errno.ENOENT)
     elif not os.path.exists(dest):
-        raise ChrootMountError("cannot bind mount to '{}'".format(dest), errno.ENOENT)
+        raise ChrootMountError(f'cannot bind mount to {dest!r}', errno.ENOENT)
 
     if src in fstypes:
         fstype = src
-        log.debug("  mounting '{}' filesystem on '{}'".format(src, dest))
+        log.debug('  mounting %r filesystem on %r', src, dest)
     else:
         fstype = None
         mount_flags.append(MS_BIND)
         if recursive:
             mount_flags.append(MS_REC)
-        log.debug("  bind mounting '{}' on '{}'".format(src, dest))
+        log.debug('  bind mounting %r on %r', src, dest)
 
     try:
         mount(source=src, target=dest, fstype=fstype,
@@ -116,4 +116,4 @@ def bind(src, dest, chroot, create=False, log=None, readonly=False,
                   data=','.join(mount_options))
     except OSError as e:
         raise ChrootMountError(
-            'Failed mounting: mount -t {} {} {}'.format(fstype, src, dest), e.errno)
+            f'failed mounting: mount -t {fstype} {src} {dest}', e.errno)
