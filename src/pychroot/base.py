@@ -68,6 +68,7 @@ class Chroot(SplitExec):
                 self.log.debug('Expanding mountpoint %r to %r', source, src)
                 self.mountpoints[src] = opts
                 del self.mountpoints[k]
+                k = src
                 if '$' in chrmount:
                     chrmount = os.path.join(self.path, src.lstrip('/'))
 

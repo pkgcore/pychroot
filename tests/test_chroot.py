@@ -37,7 +37,7 @@ def test_Chroot():
             Chroot('/nonexistent/path')
         exists.return_value = True
 
-        # $FAKEPATH not defined in environment
+        # $FAKEVAR not defined in environment
         with raises(ChrootMountError):
             Chroot('/', mountpoints={'$FAKEVAR': {}})
 
@@ -49,7 +49,14 @@ def test_Chroot():
         assert len(list(chroot.mounts)) - len(chroot.default_mounts) == 1
 
         with mock.patch('os.getenv', return_value='/fake/src/path'):
-            Chroot('/', mountpoints={'$FAKEVAR': {}})
+            chroot = Chroot('/', mountpoints={'$FAKEVAR': {}})
+        assert '/fake/src/path' in chroot.mountpoints
+
+        exists.side_effect = chain([True], cycle([False]))
+        with mock.patch('os.getenv', return_value='/fake/src/path'):
+            chroot = Chroot('/', mountpoints={'$FAKEVAR:/fake/dest/path': {}})
+        assert chroot.mountpoints['/fake/src/path'].get('create', False)
+        exists.side_effect = None
 
         # test parent process
         fork.return_value = 10
