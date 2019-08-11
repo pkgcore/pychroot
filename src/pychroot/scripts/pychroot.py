@@ -124,15 +124,13 @@ def _validate_args(parser, namespace):
 
 @argparser.bind_main_func
 def main(options, out, err):
+    cmd = options.command[0]
     try:
         with Chroot(options.path, mountpoints=options.mountpoints,
                     hostname=options.hostname, skip_chdir=options.skip_chdir) as c:
-            os.execvp(options.command[0], options.command)
-    except EnvironmentError as e:
-        if (e.errno == errno.ENOENT):
-            argparser.error("failed to run command '{}': {}".format(
-                options.command[0], e.strerror), status=1)
-        raise
+            os.execvp(cmd, options.command)
+    except FileNotFoundError as e:
+        argparser.error(f'failed to run command {cmd!r}: {e}', status=1)
     except ChrootError as e:
         argparser.error(str(e), status=1)
 

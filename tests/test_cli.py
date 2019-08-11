@@ -80,15 +80,11 @@ def test_cli(capfd):
         execvp.assert_called_once_with('ls -R /', ['ls -R /'])
         execvp.reset_mock()
 
-        e = EnvironmentError("command doesn't exist")
-        e.errno = errno.ENOENT
-        e.strerror = os.strerror(e.errno)
+        e = FileNotFoundError("command doesn't exist")
         execvp.side_effect = e
         pychroot([chroot, 'nonexistent'])
         out, err = capfd.readouterr()
-        assert err == (
-            "pychroot: error: failed to run command "
-            "'nonexistent': {}\n".format(e.strerror))
+        assert err == f"pychroot: error: failed to run command 'nonexistent': {e}\n"
         execvp.reset_mock()
 
         os.rmdir(chroot)
