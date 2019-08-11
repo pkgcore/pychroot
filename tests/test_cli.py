@@ -1,10 +1,5 @@
-import errno
-import os
 import shlex
-import tempfile
 from unittest.mock import patch
-
-from pytest import raises
 
 from snakeoil.cli.tool import Tool
 
@@ -46,7 +41,7 @@ def test_arg_parsing():
     }
 
 
-def test_cli(capfd):
+def test_cli(capfd, tmp_path):
     """Various command line interaction checks."""
     pychroot = Tool(argparser)
 
@@ -65,14 +60,13 @@ def test_cli(capfd):
         "to 'nonexistent': Not a directory\n")
 
     with patch('pychroot.scripts.pychroot.Chroot'), \
+            patch('os.getenv', return_value='/bin/sh'), \
             patch('os.execvp') as execvp:
-        # TODO: replace with tempfile.TemporaryDirectory() context manager
-        # after dropping py2.7 support
-        chroot = tempfile.mkdtemp()
+        chroot = str(tmp_path)
 
         # exec arg testing
         pychroot([chroot])
-        shell = os.getenv('SHELL', '/bin/sh')
+        shell = '/bin/sh'
         execvp.assert_called_once_with(shell, [shell, '-i'])
         execvp.reset_mock()
 
@@ -86,5 +80,3 @@ def test_cli(capfd):
         out, err = capfd.readouterr()
         assert err == f"pychroot: error: failed to run command 'nonexistent': {e}\n"
         execvp.reset_mock()
-
-        os.rmdir(chroot)
