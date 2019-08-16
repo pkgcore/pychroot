@@ -4,7 +4,7 @@ import os
 
 
 class ChrootError(Exception):
-    """Exception that is raised when there is an error when trying to set up a chroot."""
+    """Exception raised when there is an error setting up a chroot."""
 
     def __init__(self, message, errno=None):
         self.message = message
@@ -22,4 +22,4 @@ class ChrootError(Exception):
 
 
 class ChrootMountError(ChrootError):
-    """Exception that is raised when there is an error trying to set up the bind mounts for a chroot."""
+    """Exception raised when there is an error setting up chroot bind mounts."""
