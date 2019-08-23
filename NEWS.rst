@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+pychroot 0.10.0 (2019-08-23)
+----------------------------
+
+- Minimum supported python version is now python3.6 (python2 support dropped).
+
+- Fix handling of environment variable mounts to nonexistent paths.
+
 pychroot 0.9.18 (2017-10-04)
 ----------------------------
 
