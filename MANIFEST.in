@@ -1,5 +1,8 @@
 include AUTHORS LICENSE *.py *.rst
-include tox.ini
+include tox.ini pyproject.toml
 recursive-include bin *
 recursive-include doc *
+recursive-include requirements *
+recursive-include src *
+recursive-include tests *
 global-exclude *.pyc *.pyo __pycache__
