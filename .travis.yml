@@ -38,8 +38,8 @@ jobs:
       - secure: Kb6Fb2EX9skkftvy63SDTCQSazBhn2RFVxYkSy9K1l0+qzi7dujalMuEVCwWZei6WdvpemzIvRx2lNM7Az5mOollTmLTSAUlcaaDNbO+vn4YJmXzgFoDELd+YZp1nRT1Aears/EK0P+uoAILOBfEm3kc/b7sql3upjit+khjHko=
       - CIBW_PLATFORM=linux
       - CIBW_BUILD="cp36-* cp37-* cp38-*"
-      - CIBW_BEFORE_BUILD="pip install -r requirements/wheel.txt -r requirements/test.txt"
-      - CIBW_TEST_COMMAND="py.test {project}/tests"
+      - CIBW_BEFORE_BUILD="pip install -r requirements/wheel.txt"
+      - CIBW_TEST_COMMAND="pip install -r {project}/requirements/test.txt && py.test {project}/tests"
       before_script:
       - git clone https://github.com/pkgcore/pkgdist.git
       - pkgdist/ci.sh
