@@ -85,37 +85,30 @@ support::
 Installing
 ==========
 
-In a virtualenv or elsewhere via pip::
+Installing latest release from pypi::
 
     pip install pychroot
 
-From the repo manually::
+Installing from a release tarball::
 
     python setup.py install
-
-Bugs
-====
-
-Please create an issue in the `issue tracker`_.
 
 Tests
 =====
 
-Tests are handled via pytest, run via::
-
-    py.test
-
-which is also integrated into setup.py, run via::
+A standalone test runner is integrated in setup.py; to run, just execute::
 
     python setup.py test
 
-Also, tests for all supported python versions can be run together or
-individually via::
+In addition, a tox config is provided so the testsuite can be run in a
+virtualenv setup against all supported python versions. To run tests for all
+environments just execute **tox** in the root directory of a repo or unpacked
+tarball. Otherwise, for a specific python version execute something similar to
+the following::
 
-    tox
+    tox -e py36
 
 
-.. _`issue tracker`: https://github.com/pkgcore/pychroot/issues
 .. _`snakeoil`: https://github.com/pkgcore/snakeoil
 .. _mock: https://pypi.python.org/pypi/mock
 
