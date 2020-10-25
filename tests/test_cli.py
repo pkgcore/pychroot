@@ -61,22 +61,22 @@ def test_cli(capfd, tmp_path):
 
     with patch('pychroot.scripts.pychroot.Chroot'), \
             patch('os.getenv', return_value='/bin/sh'), \
-            patch('os.execvp') as execvp:
+            patch('subprocess.run') as run:
         chroot = str(tmp_path)
 
         # exec arg testing
         pychroot([chroot])
         shell = '/bin/sh'
-        execvp.assert_called_once_with(shell, [shell, '-i'])
-        execvp.reset_mock()
+        run.assert_called_once_with([shell, '-i'])
+        run.reset_mock()
 
         pychroot([chroot, 'ls -R /'])
-        execvp.assert_called_once_with('ls -R /', ['ls -R /'])
-        execvp.reset_mock()
+        run.assert_called_once_with(['ls -R /'])
+        run.reset_mock()
 
         e = FileNotFoundError("command doesn't exist")
-        execvp.side_effect = e
+        run.side_effect = e
         pychroot([chroot, 'nonexistent'])
         out, err = capfd.readouterr()
         assert err == f"pychroot: error: failed to run command 'nonexistent': {e}\n"
-        execvp.reset_mock()
+        run.reset_mock()

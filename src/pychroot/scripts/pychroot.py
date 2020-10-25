@@ -16,10 +16,9 @@ to resort to scripted mount handling or other methods.
 """
 
 import argparse
-import errno
 from functools import partial
 import os
-import sys
+import subprocess
 
 from snakeoil.cli import arghparse
 
@@ -124,12 +123,12 @@ def _validate_args(parser, namespace):
 
 @argparser.bind_main_func
 def main(options, out, err):
-    cmd = options.command[0]
     try:
         with Chroot(options.path, mountpoints=options.mountpoints,
                     hostname=options.hostname, skip_chdir=options.skip_chdir) as c:
-            os.execvp(cmd, options.command)
+            subprocess.run(options.command)
     except FileNotFoundError as e:
+        cmd = options.command[0]
         argparser.error(f'failed to run command {cmd!r}: {e}', status=1)
     except ChrootError as e:
         argparser.error(str(e), status=1)
