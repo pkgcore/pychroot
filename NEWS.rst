@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+pychroot 0.10.2 (2020-10-25)
+----------------------------
+
+- Add py3.9 support.
+
+- Fix pychroot script hang on >=py3.7 (#30).
+
 pychroot 0.10.1 (2019-11-30)
 ----------------------------
 
