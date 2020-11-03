@@ -85,11 +85,15 @@ support::
 Installing
 ==========
 
-Installing latest release from pypi::
+Installing latest pypi release::
 
     pip install pychroot
 
-Installing from a release tarball::
+Installing from git::
+
+    pip install https://github.com/pkgcore/pychroot/archive/master.tar.gz
+
+Installing from a tarball::
 
     python setup.py install
 
