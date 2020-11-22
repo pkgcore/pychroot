@@ -1,4 +1,4 @@
-include AUTHORS LICENSE *.py *.rst
+include LICENSE *.py *.rst
 include tox.ini pyproject.toml
 recursive-include bin *
 recursive-include doc *
