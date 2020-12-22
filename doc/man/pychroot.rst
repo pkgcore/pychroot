@@ -29,8 +29,6 @@ Please submit an issue via github:
 
 https://github.com/pkgcore/pychroot/issues
 
-You can also stop by #pkgcore on freenode.
-
 See Also
 ========
 
