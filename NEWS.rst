@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+pychroot 0.10.3 (2020-12-22)
+----------------------------
+
+- Fix build with newer versions of snakeoil.
+
 pychroot 0.10.2 (2020-10-25)
 ----------------------------
 
