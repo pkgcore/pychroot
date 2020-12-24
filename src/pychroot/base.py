@@ -118,13 +118,12 @@ class Chroot(SplitExec):
                     os.remove(chrmount)
                     chrmount = os.path.dirname(chrmount)
                 os.removedirs(chrmount)
-            # don't fail if leaf directories aren't empty when trying to remove them
-            except OSError:
-                pass
-            except Exception as e:
-                raise ChrootMountError(
-                    f'failed to remove chroot mount point {chrmount!r}',
-                    getattr(e, 'errno', None))
+            except OSError as e:
+                # ignore non-empty directories and permission errors
+                if e.errno not in (errno.ENOTEMPTY, errno.EACCES):
+                    raise ChrootMountError(
+                        f'failed to remove chroot mount point {chrmount!r}',
+                        getattr(e, 'errno', None))
 
     def _mount(self):
         """Do the bind mounts for this chroot object.

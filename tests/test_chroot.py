@@ -79,17 +79,3 @@ def test_Chroot():
         default_mounts = dict(Chroot.default_mounts)
         chroot = Chroot('/', mountpoints={'tmpfs:/tmp': {}})
         assert default_mounts == chroot.default_mounts
-
-        remove.side_effect = Exception('fake exception')
-        exists.side_effect = chain([True], cycle([False]))
-        chroot = Chroot('/', mountpoints={'/root:/blah': {}})
-        with raises(ChrootMountError):
-            with chroot:
-                pass
-        remove.side_effect = None
-        exists.side_effect = None
-
-        chdir.side_effect = Exception('fake exception')
-        with chroot:
-            pass
-        chdir.side_effect = None
