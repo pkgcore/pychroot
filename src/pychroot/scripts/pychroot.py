@@ -114,11 +114,10 @@ def _validate_args(parser, namespace):
     if not namespace.command:
         namespace.command = [os.getenv('SHELL', '/bin/sh'), '-i']
 
-    if not hasattr(namespace, 'mountpoints'):
-        namespace.mountpoints = None
-
     if namespace.no_mounts:
-        Chroot.default_mounts = {}
+        namespace.mountpoints = None
+    elif not hasattr(namespace, 'mountpoints'):
+        namespace.mountpoints = {}
 
 
 @argparser.bind_main_func

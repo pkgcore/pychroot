@@ -4,24 +4,20 @@ from unittest.mock import patch
 from snakeoil.cli.tool import Tool
 
 from pychroot.scripts.pychroot import argparser
-from pychroot.base import Chroot
 
 
 def test_arg_parsing():
     """Various argparse checks."""
     # no mounts
-    orig_default_mounts = Chroot.default_mounts.copy()
     opts = argparser.parse_args('--no-mounts fakedir'.split())
-    assert Chroot.default_mounts == {}
-    Chroot.default_mounts = orig_default_mounts
-    assert Chroot.default_mounts != {}
+    assert opts.mountpoints is None
 
     # single newroot arg with $SHELL from env
     with patch('os.getenv', return_value='shell'):
         opts = argparser.parse_args(['dir'])
         assert opts.path == 'dir'
         assert opts.command == ['shell', '-i']
-        assert opts.mountpoints is None
+        assert opts.mountpoints == {}
 
     # default shell when $SHELL isn't defined in the env
     with patch.dict('os.environ', {}, clear=True):

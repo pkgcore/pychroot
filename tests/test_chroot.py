@@ -76,7 +76,7 @@ def test_Chroot():
 
         # make sure the default mount points aren't altered
         # when passing custom mount points
-        default_mounts = Chroot.default_mounts.copy()
+        default_mounts = dict(Chroot.default_mounts)
         chroot = Chroot('/', mountpoints={'tmpfs:/tmp': {}})
         assert default_mounts == chroot.default_mounts
 

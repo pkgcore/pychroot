@@ -2,6 +2,7 @@ import errno
 import os
 
 from snakeoil.contexts import SplitExec
+from snakeoil.mappings import ImmutableDict
 from snakeoil.process.namespaces import simple_unshare
 
 from .exceptions import ChrootError, ChrootMountError
@@ -21,7 +22,8 @@ class Chroot(SplitExec):
     :param log: A log object to use for logging.
     :type log: logging.Logger
     :param mountpoints: A dictionary defining the mountpoints to use. These can
-        override any of the defaults or add extra mountpoints
+        override any of the defaults or add extra mountpoints. Set to None to
+        disable all default mountpoints.
     :type mountpoints: dict
     :param hostname: The hostname for the chroot, defaults to the system
     hostname. In order to set the chroot domain name as well specify an
@@ -29,22 +31,26 @@ class Chroot(SplitExec):
     :type hostname: str
     """
 
-    default_mounts = {
+    default_mounts = ImmutableDict({
         '/dev': {'recursive': True},
         'proc:/proc': {},
         'sysfs:/sys': {},
         'tmpfs:/dev/shm': {},
         '/etc/resolv.conf': {},
-    }
+    })
 
-    def __init__(self, path, /, *, log=None, mountpoints=None, hostname=None, skip_chdir=False):
+    def __init__(self, path, /, *, log=None, mountpoints=(), hostname=None, skip_chdir=False):
         super(Chroot, self).__init__()
         self.log = getlogger(log, __name__)
         self.path = os.path.abspath(path)
         self.hostname = hostname
         self.skip_chdir = skip_chdir
-        self.mountpoints = self.default_mounts.copy()
-        self.mountpoints.update(mountpoints if mountpoints else {})
+
+        if mountpoints is None:
+            self.mountpoints = {}
+        else:
+            self.mountpoints = dict(self.default_mounts)
+            self.mountpoints.update(mountpoints)
 
         if not os.path.isdir(self.path):
             raise ChrootError(f'cannot change root directory to {path!r}', errno.ENOTDIR)
