@@ -41,6 +41,11 @@ def test_Chroot():
         with raises(ChrootMountError):
             Chroot('/', mountpoints={'$FAKEVAR': {}})
 
+        # no mountpoints
+        chroot = Chroot('/', mountpoints=None)
+        assert chroot.mountpoints == {}
+        assert list(chroot.mounts) == []
+
         # optional, undefined variable mounts get dropped
         chroot = Chroot('/', mountpoints={
             '$FAKEVAR': {'optional': True},
