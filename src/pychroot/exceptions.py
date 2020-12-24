@@ -6,19 +6,15 @@ import os
 class ChrootError(Exception):
     """Exception raised when there is an error setting up a chroot."""
 
-    def __init__(self, message, errno=None):
-        self.message = message
-        self.args = (message,)
-
-        if errno is not None:
-            self.errno = errno
-            self.strerror = os.strerror(errno)
+    def __init__(self, msg, errno=None):
+        self.msg = msg
+        self.errno = errno
 
     def __str__(self):
-        error_messages = [self.message]
-        if getattr(self, 'strerror', False):
-            error_messages.append(self.strerror)
-        return ': '.join(error_messages)
+        error = [self.msg]
+        if self.errno is not None:
+            error.append(os.strerror(self.errno))
+        return ': '.join(error)
 
 
 class ChrootMountError(ChrootError):
