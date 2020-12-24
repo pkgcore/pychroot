@@ -1,3 +1,4 @@
+import socket
 from itertools import chain, cycle
 from unittest import mock
 
@@ -67,10 +68,10 @@ def test_Chroot():
         # test parent process
         fork.return_value = 10
 
-        # TODO: fix testing hang under py37
-        # chroot = Chroot('/', hostname='test')
-        # with chroot:
-        #     pass
+        # test UTS namespace
+        chroot = Chroot('/', hostname='hostname-test')
+        with chroot:
+            assert socket.gethostname() == 'hostname-test'
 
         # test child process
         fork.return_value = 0
