@@ -40,7 +40,7 @@ class Chroot(SplitExec):
     })
 
     def __init__(self, path, /, *, log=None, mountpoints=(), hostname=None, skip_chdir=False):
-        super(Chroot, self).__init__()
+        super().__init__()
         self.log = getlogger(log, __name__)
         self.path = os.path.abspath(path)
         self.hostname = hostname
