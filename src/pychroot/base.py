@@ -119,8 +119,8 @@ class Chroot(SplitExec):
                     chrmount = os.path.dirname(chrmount)
                 os.removedirs(chrmount)
             except OSError as e:
-                # ignore non-empty directories and permission errors
-                if e.errno not in (errno.ENOTEMPTY, errno.EACCES):
+                # ignore missing mountpoints, non-empty directories, and permission errors
+                if e.errno not in (errno.ENOTEMPTY, errno.EACCES, errno.ENOENT):
                     raise ChrootMountError(
                         f'failed to remove chroot mount point {chrmount!r}',
                         getattr(e, 'errno', None))
