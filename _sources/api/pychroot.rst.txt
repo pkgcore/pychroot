@@ -1,0 +1,20 @@
+pychroot package
+================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pychroot.base
+   pychroot.exceptions
+   pychroot.utils
+
+Module contents
+---------------
+
+.. automodule:: pychroot
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pychroot.utils module &#8212; pychroot master documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="pychroot.exceptions module" href="pychroot.exceptions.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pychroot.exceptions.html" title="pychroot.exceptions module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pychroot master documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pychroot.html" accesskey="U">pychroot package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pychroot.utils module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pychroot.utils">
+<span id="pychroot-utils-module"></span><h1>pychroot.utils module<a class="headerlink" href="#module-pychroot.utils" title="Permalink to this headline">¶</a></h1>
+<p>Various chroot-related utilities mostly dealing with bind mounting.</p>
+<dl class="py function">
+<dt id="pychroot.utils.bind">
+<code class="sig-prename descclassname">pychroot.utils.</code><code class="sig-name descname">bind</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">src</span></em>, <em class="sig-param"><span class="n">dest</span></em>, <em class="sig-param"><span class="n">chroot</span></em>, <em class="sig-param"><span class="n">create</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">readonly</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">recursive</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">_kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pychroot/utils.html#bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pychroot.utils.bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up a bind mount.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>src</strong> (<em>str</em>) – The source location to mount.</p></li>
+<li><p><strong>dest</strong> (<em>str</em>) – The destination to mount on.</p></li>
+<li><p><strong>chroot</strong> (<em>str</em>) – The chroot base path.</p></li>
+<li><p><strong>create</strong> (<em>bool</em>) – Whether to create the destination.</p></li>
+<li><p><strong>log</strong> (<em>logging.Logger</em>) – A logger to use for logging.</p></li>
+<li><p><strong>readonly</strong> (<em>bool</em>) – Whether to remount read-only.</p></li>
+<li><p><strong>recursive</strong> (<em>bool</em>) – Whether to use a recursive bind mount.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pychroot.utils.dictbool">
+<code class="sig-prename descclassname">pychroot.utils.</code><code class="sig-name descname">dictbool</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dct</span></em>, <em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pychroot/utils.html#dictbool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pychroot.utils.dictbool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a key exists and is True in a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dct</strong> (<em>dict</em>) – The dictionary to check.</p></li>
+<li><p><strong>key</strong> (<em>any</em>) – The key to check</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pychroot.utils.getlogger">
+<code class="sig-prename descclassname">pychroot.utils.</code><code class="sig-name descname">getlogger</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span></em>, <em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pychroot/utils.html#getlogger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pychroot.utils.getlogger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a logger given a logger and a package.</p>
+<p>Will return the given logger if the name is not generated from
+the current package, otherwise generate a logger based on __name__.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log</strong> (<em>logging.Logger</em>) – Logger to start with.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The __name__ of the caller.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pychroot.exceptions.html"
+                        title="previous chapter">pychroot.exceptions module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/pychroot.utils.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pychroot.exceptions.html" title="pychroot.exceptions module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pychroot master documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pychroot.html" >pychroot package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pychroot.utils module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2018, pychroot contributors.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pychroot.utils &#8212; pychroot master documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pychroot master documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pychroot.utils</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pychroot.utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Various chroot-related utilities mostly dealing with bind mounting.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">snakeoil.fileutils</span> <span class="kn">import</span> <span class="n">touch</span>
+<span class="kn">from</span> <span class="nn">snakeoil.osutils.mount</span> <span class="kn">import</span> <span class="n">mount</span><span class="p">,</span> <span class="n">MS_BIND</span><span class="p">,</span> <span class="n">MS_REC</span><span class="p">,</span> <span class="n">MS_REMOUNT</span><span class="p">,</span> <span class="n">MS_RDONLY</span>
+
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">ChrootMountError</span>
+
+
+<div class="viewcode-block" id="dictbool"><a class="viewcode-back" href="../../api/pychroot.utils.html#pychroot.utils.dictbool">[docs]</a><span class="k">def</span> <span class="nf">dictbool</span><span class="p">(</span><span class="n">dct</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if a key exists and is True in a dictionary.</span>
+
+<span class="sd">    :param dct: The dictionary to check.</span>
+<span class="sd">    :type dct: dict</span>
+<span class="sd">    :param key: The key to check</span>
+<span class="sd">    :type key: any</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dct</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dct</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="n">dct</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="getlogger"><a class="viewcode-back" href="../../api/pychroot.utils.html#pychroot.utils.getlogger">[docs]</a><span class="k">def</span> <span class="nf">getlogger</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets a logger given a logger and a package.</span>
+
+<span class="sd">    Will return the given logger if the name is not generated from</span>
+<span class="sd">    the current package, otherwise generate a logger based on __name__.</span>
+
+<span class="sd">    :param log: Logger to start with.</span>
+<span class="sd">    :type log: logging.Logger</span>
+<span class="sd">    :param name: The __name__ of the caller.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">log</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">log</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="bind"><a class="viewcode-back" href="../../api/pychroot.utils.html#pychroot.utils.bind">[docs]</a><span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">chroot</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+         <span class="n">recursive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">_kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set up a bind mount.</span>
+
+<span class="sd">    :param src: The source location to mount.</span>
+<span class="sd">    :type src: str</span>
+<span class="sd">    :param dest: The destination to mount on.</span>
+<span class="sd">    :type dest: str</span>
+<span class="sd">    :param chroot: The chroot base path.</span>
+<span class="sd">    :type chroot: str</span>
+<span class="sd">    :param create: Whether to create the destination.</span>
+<span class="sd">    :type create: bool</span>
+<span class="sd">    :param log: A logger to use for logging.</span>
+<span class="sd">    :type log: logging.Logger</span>
+<span class="sd">    :param readonly: Whether to remount read-only.</span>
+<span class="sd">    :type readonly: bool</span>
+<span class="sd">    :param recursive: Whether to use a recursive bind mount.</span>
+<span class="sd">    :type recursive: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">getlogger</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">fstypes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;proc&#39;</span><span class="p">,</span> <span class="s1">&#39;sysfs&#39;</span><span class="p">,</span> <span class="s1">&#39;tmpfs&#39;</span><span class="p">)</span>
+    <span class="n">mount_flags</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">mount_options</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">src</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fstypes</span><span class="p">:</span>
+        <span class="n">src</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">dest</span><span class="p">):</span>
+        <span class="n">dest</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chroot</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dest</span><span class="p">):</span>
+            <span class="n">create</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dest</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">create</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="ow">and</span> <span class="n">src</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fstypes</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">dest</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="ow">and</span> <span class="n">src</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fstypes</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">touch</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ChrootMountError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;cannot bind mount to </span><span class="si">{</span><span class="n">dest</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s1">&#39;errno&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="ow">and</span> <span class="n">src</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fstypes</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ChrootMountError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cannot bind mount from </span><span class="si">{</span><span class="n">src</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOENT</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dest</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ChrootMountError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cannot bind mount to </span><span class="si">{</span><span class="n">dest</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOENT</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">fstypes</span><span class="p">:</span>
+        <span class="n">fstype</span> <span class="o">=</span> <span class="n">src</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;  mounting </span><span class="si">%r</span><span class="s1"> filesystem on </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fstype</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">mount_flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MS_BIND</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">recursive</span><span class="p">:</span>
+            <span class="n">mount_flags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MS_REC</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;  bind mounting </span><span class="si">%r</span><span class="s1"> on </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mount</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span> <span class="n">fstype</span><span class="o">=</span><span class="n">fstype</span><span class="p">,</span>
+              <span class="n">flags</span><span class="o">=</span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">or_</span><span class="p">,</span> <span class="n">mount_flags</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+              <span class="n">data</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mount_options</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">readonly</span><span class="p">:</span>
+            <span class="n">mount_flags</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">MS_REMOUNT</span><span class="p">,</span> <span class="n">MS_RDONLY</span><span class="p">])</span>
+            <span class="n">mount</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span> <span class="n">fstype</span><span class="o">=</span><span class="n">fstype</span><span class="p">,</span>
+                  <span class="n">flags</span><span class="o">=</span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">or_</span><span class="p">,</span> <span class="n">mount_flags</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                  <span class="n">data</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mount_options</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ChrootMountError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;failed mounting: mount -t </span><span class="si">{</span><span class="n">fstype</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">src</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">dest</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pychroot master documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pychroot.utils</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2018, pychroot contributors.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

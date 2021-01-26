@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pychroot &#8212; pychroot master documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pychroot master documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pychroot</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pychroot">
+<h1>pychroot<a class="headerlink" href="#pychroot" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="synopsis">
+<h2>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h2>
+<p>pychroot [-h] [--version] [--no-mounts] [--hostname HOSTNAME] [--skip-chdir] [-B SRC[:DEST]] [-R SRC[:DEST]] [--ro SRC[:DEST]] path ...</p>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>pychroot is an extended <strong>chroot(1)</strong> equivalent that also provides support for
+automatically handling bind mounts. By default, the proc and sysfs filesystems
+are mounted to their respective /proc and /sys locations inside the chroot as
+well as bind mounting /dev and /etc/resolv.conf from the host system.</p>
+<p>In addition to the defaults, the user is able to specify custom bind mounts.
+For example, the following command will recursively bind mount the user's home
+directory at the same location inside the chroot directory:</p>
+<p>pychroot -R /home/user ~/chroot</p>
+<p>This allows a user to easily set up a custom chroot environment without having
+to resort to scripted mount handling or other methods.</p>
+</div>
+<div class="section" id="positional-arguments">
+<h2>Positional Arguments<a class="headerlink" href="#positional-arguments" title="Permalink to this headline">¶</a></h2>
+<dl class="field-list">
+<dt class="field-odd">path</dt>
+<dd class="field-odd"><p>path to newroot</p>
+</dd>
+<dt class="field-even">command</dt>
+<dd class="field-even"><p>Optional command to run.</p>
+<p>Similar to chroot(1), if unspecified this defaults to $SHELL from the
+host environment and if that's unset it executes /bin/sh.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="base-options">
+<h2>Base Options<a class="headerlink" href="#base-options" title="Permalink to this headline">¶</a></h2>
+<dl class="option-list">
+<dt><kbd><span class="option">-h</span>, <span class="option">--help</span></kbd></dt>
+<dd><p>Show this help message and exit. To get more
+information see the related man page.</p>
+</dd>
+<dt><kbd><span class="option">--version</span></kbd></dt>
+<dd><p>Show this program's version information and exit.</p>
+<p>When running from within a git repo or a version
+installed from git the latest commit hash and date will
+be shown.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="chroot-options">
+<h2>Chroot Options<a class="headerlink" href="#chroot-options" title="Permalink to this headline">¶</a></h2>
+<dl class="option-list">
+<dt><kbd><span class="option">--no-mounts</span></kbd></dt>
+<dd><p>Disable the default bind mounts which can be used to obtain a standard
+chroot environment that you'd expect when using chroot(1).</p>
+</dd>
+<dt><kbd><span class="option">--hostname <var>HOSTNAME</var></span></kbd></dt>
+<dd><p>Specify the chroot hostname. In order to set the domain name as well,
+pass an FQDN instead of a singular hostname.</p>
+</dd>
+<dt><kbd><span class="option">--skip-chdir</span></kbd></dt>
+<dd><p>Do not change the current working directory to '/'.</p>
+<p>Unlike chroot(1), this currently doesn't limit you to only using it
+when the new root isn't '/'. In other words, you can use a new chroot
+environment on the current host system rootfs with one caveat: any
+absolute paths will use the new rootfs.</p>
+</dd>
+</dl>
+<dl>
+<dt>-B SRC[:DEST], --bind SRC[:DEST]</dt><dd><p>Specify a custom bind mount.</p>
+<p>In order to mount the same source to multiple destinations, use the
+SRC:DEST syntax. For example, the following will bind mount '/srv/data'
+to /srv/data and /home/user/data in the chroot:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pychroot</span> <span class="o">-</span><span class="n">B</span> <span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">data</span> <span class="o">-</span><span class="n">B</span> <span class="o">/</span><span class="n">srv</span><span class="o">/</span><span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">data</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">chroot</span>
+</pre></div>
+</div>
+</dd>
+<dt>-R SRC[:DEST], --rbind SRC[:DEST]</dt><dd><p>specify custom recursive bind mount</p>
+</dd>
+<dt>--ro SRC[:DEST], --readonly SRC[:DEST]</dt><dd><p>Specify a custom readonly bind mount.</p>
+<p>Readonly, recursive bind mounts aren't currently supported on Linux so
+this has to be a standalone option for now. Once they are, support for
+them and other mount attributes will be added as an extension to the
+mount point argument syntax.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="example-usage">
+<h2>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
+<p>Pass through the host system's ssh agent in order to support regular ssh auth
+for a specific user in the chroot:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pychroot -R /home/user --ro $SSH_AUTH_SOCK --ro /etc/passwd --ro /etc/shadow /path/to/chroot /bin/bash
+</pre></div>
+</div>
+<p>Use the chroot environment while retaining access to the host file system:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pychroot</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">chdir</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">chroot</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+<p>Set the chroot environment hostname to 'chroot' and the domain to 'foo.org':</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pychroot</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">chroot</span><span class="o">.</span><span class="n">foo</span><span class="o">.</span><span class="n">org</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">chroot</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="reporting-bugs">
+<h2>Reporting Bugs<a class="headerlink" href="#reporting-bugs" title="Permalink to this headline">¶</a></h2>
+<p>Please submit an issue via github:</p>
+<p><a class="reference external" href="https://github.com/pkgcore/pychroot/issues">https://github.com/pkgcore/pychroot/issues</a></p>
+</div>
+<div class="section" id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Permalink to this headline">¶</a></h2>
+<p>chroot(1)</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pychroot</a><ul>
+<li><a class="reference internal" href="#synopsis">Synopsis</a></li>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#positional-arguments">Positional Arguments</a></li>
+<li><a class="reference internal" href="#base-options">Base Options</a></li>
+<li><a class="reference internal" href="#chroot-options">Chroot Options</a></li>
+<li><a class="reference internal" href="#example-usage">Example Usage</a></li>
+<li><a class="reference internal" href="#reporting-bugs">Reporting Bugs</a></li>
+<li><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/man/pychroot.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pychroot master documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pychroot</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2018, pychroot contributors.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

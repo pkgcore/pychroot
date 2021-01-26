@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pychroot.base module &#8212; pychroot master documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pychroot.exceptions module" href="pychroot.exceptions.html" />
+    <link rel="prev" title="pychroot package" href="pychroot.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pychroot.exceptions.html" title="pychroot.exceptions module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pychroot.html" title="pychroot package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pychroot master documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pychroot.html" accesskey="U">pychroot package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pychroot.base module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pychroot.base">
+<span id="pychroot-base-module"></span><h1>pychroot.base module<a class="headerlink" href="#module-pychroot.base" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="pychroot.base.Chroot">
+<em class="property">class </em><code class="sig-prename descclassname">pychroot.base.</code><code class="sig-name descname">Chroot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="o">/</span></em>, <em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mountpoints</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">hostname</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">skip_chdir</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pychroot/base.html#Chroot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pychroot.base.Chroot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">snakeoil.contexts.SplitExec</span></code></p>
+<p>Context manager that provides chroot support.</p>
+<p>This is done by forking, doing some magic on the stack so the contents are
+not executed in the parent, and executing the context in the forked child.
+Exceptions are pickled and passed through to the parent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The path to the image to chroot into.</p></li>
+<li><p><strong>log</strong> (<em>logging.Logger</em>) – A log object to use for logging.</p></li>
+<li><p><strong>mountpoints</strong> (<em>dict</em>) – A dictionary defining the mountpoints to use. These can
+override any of the defaults or add extra mountpoints. Set to None to
+disable all default mountpoints.</p></li>
+<li><p><strong>hostname</strong> – The hostname for the chroot, defaults to the system</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>hostname. In order to set the chroot domain name as well specify an</dt><dd><p>FQDN instead of a singular hostname.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt id="pychroot.base.Chroot.default_mounts">
+<code class="sig-name descname">default_mounts</code><em class="property"> = {'/dev': {'recursive': True}, 'proc:/proc': {}, 'sysfs:/sys': {}, 'tmpfs:/dev/shm': {}, '/etc/resolv.conf': {}}</em><a class="headerlink" href="#pychroot.base.Chroot.default_mounts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pychroot.base.Chroot.mounts">
+<em class="property">property </em><code class="sig-name descname">mounts</code><a class="headerlink" href="#pychroot.base.Chroot.mounts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pychroot.html"
+                        title="previous chapter">pychroot package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pychroot.exceptions.html"
+                        title="next chapter">pychroot.exceptions module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/pychroot.base.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pychroot.exceptions.html" title="pychroot.exceptions module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pychroot.html" title="pychroot package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pychroot master documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pychroot.html" >pychroot package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pychroot.base module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2018, pychroot contributors.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

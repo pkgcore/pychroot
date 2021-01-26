@@ -1,0 +1,63 @@
+Positional Arguments
+====================
+
+:path:     
+         path to newroot
+:command:  
+         Optional command to run.
+         
+         Similar to chroot(1), if unspecified this defaults to $SHELL from the
+         host environment and if that's unset it executes /bin/sh.
+
+Base Options
+============
+
+-h, --help  
+            Show this help message and exit. To get more
+            information see the related man page.
+
+--version   
+            Show this program's version information and exit.
+            
+            When running from within a git repo or a version
+            installed from git the latest commit hash and date will
+            be shown.
+
+Chroot Options
+==============
+
+--no-mounts                             
+                                        Disable the default bind mounts which can be used to obtain a standard
+                                        chroot environment that you'd expect when using chroot(1).
+
+--hostname HOSTNAME                     
+                                        Specify the chroot hostname. In order to set the domain name as well,
+                                        pass an FQDN instead of a singular hostname.
+
+--skip-chdir                            
+                                        Do not change the current working directory to '/'.
+                                        
+                                        Unlike chroot(1), this currently doesn't limit you to only using it
+                                        when the new root isn't '/'. In other words, you can use a new chroot
+                                        environment on the current host system rootfs with one caveat: any
+                                        absolute paths will use the new rootfs.
+
+-B SRC[:DEST], --bind SRC[:DEST]        
+                                        Specify a custom bind mount.
+                                        
+                                        In order to mount the same source to multiple destinations, use the
+                                        SRC:DEST syntax. For example, the following will bind mount '/srv/data'
+                                        to /srv/data and /home/user/data in the chroot::
+                                        
+                                            pychroot -B /srv/data -B /srv/data:/home/user/data /path/to/chroot
+
+-R SRC[:DEST], --rbind SRC[:DEST]       
+                                        specify custom recursive bind mount
+
+--ro SRC[:DEST], --readonly SRC[:DEST]  
+                                        Specify a custom readonly bind mount.
+                                        
+                                        Readonly, recursive bind mounts aren't currently supported on Linux so
+                                        this has to be a standalone option for now. Once they are, support for
+                                        them and other mount attributes will be added as an extension to the
+                                        mount point argument syntax.

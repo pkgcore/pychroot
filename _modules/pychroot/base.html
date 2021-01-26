@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pychroot.base &#8212; pychroot master documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pychroot master documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pychroot.base</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pychroot.base</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">snakeoil.contexts</span> <span class="kn">import</span> <span class="n">SplitExec</span>
+<span class="kn">from</span> <span class="nn">snakeoil.mappings</span> <span class="kn">import</span> <span class="n">ImmutableDict</span>
+<span class="kn">from</span> <span class="nn">snakeoil.process.namespaces</span> <span class="kn">import</span> <span class="n">simple_unshare</span>
+
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">ChrootError</span><span class="p">,</span> <span class="n">ChrootMountError</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">bind</span><span class="p">,</span> <span class="n">getlogger</span><span class="p">,</span> <span class="n">dictbool</span>
+
+
+<div class="viewcode-block" id="Chroot"><a class="viewcode-back" href="../../api/pychroot.base.html#pychroot.base.Chroot">[docs]</a><span class="k">class</span> <span class="nc">Chroot</span><span class="p">(</span><span class="n">SplitExec</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Context manager that provides chroot support.</span>
+
+<span class="sd">    This is done by forking, doing some magic on the stack so the contents are</span>
+<span class="sd">    not executed in the parent, and executing the context in the forked child.</span>
+<span class="sd">    Exceptions are pickled and passed through to the parent.</span>
+
+<span class="sd">    :param path: The path to the image to chroot into.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :param log: A log object to use for logging.</span>
+<span class="sd">    :type log: logging.Logger</span>
+<span class="sd">    :param mountpoints: A dictionary defining the mountpoints to use. These can</span>
+<span class="sd">        override any of the defaults or add extra mountpoints. Set to None to</span>
+<span class="sd">        disable all default mountpoints.</span>
+<span class="sd">    :type mountpoints: dict</span>
+<span class="sd">    :param hostname: The hostname for the chroot, defaults to the system</span>
+<span class="sd">    hostname. In order to set the chroot domain name as well specify an</span>
+<span class="sd">        FQDN instead of a singular hostname.</span>
+<span class="sd">    :type hostname: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">default_mounts</span> <span class="o">=</span> <span class="n">ImmutableDict</span><span class="p">({</span>
+        <span class="s1">&#39;/dev&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;recursive&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="s1">&#39;proc:/proc&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;sysfs:/sys&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;tmpfs:/dev/shm&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;/etc/resolv.conf&#39;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="p">})</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mountpoints</span><span class="o">=</span><span class="p">(),</span> <span class="n">hostname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip_chdir</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">getlogger</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hostname</span> <span class="o">=</span> <span class="n">hostname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skip_chdir</span> <span class="o">=</span> <span class="n">skip_chdir</span>
+
+        <span class="k">if</span> <span class="n">mountpoints</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mountpoints</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mountpoints</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_mounts</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mountpoints</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mountpoints</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ChrootError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cannot change root directory to </span><span class="si">{</span><span class="n">path</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOTDIR</span><span class="p">)</span>
+
+        <span class="c1"># flag mount points that require creation and removal</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">chrmount</span><span class="p">,</span> <span class="n">opts</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mounts</span><span class="p">:</span>
+            <span class="n">src</span> <span class="o">=</span> <span class="n">source</span>
+            <span class="c1"># expand mountpoints that are environment variables</span>
+            <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">):</span>
+                <span class="n">src</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">source</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">src</span> <span class="o">==</span> <span class="n">source</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;optional&#39;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                            <span class="s1">&#39;Skipping optional and nonexistent mountpoint &#39;</span>
+                            <span class="s1">&#39;due to undefined host environment variable: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+                        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">mountpoints</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">ChrootMountError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s1">&#39;cannot mount undefined environment variable: </span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Expanding mountpoint </span><span class="si">%r</span><span class="s1"> to </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">src</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mountpoints</span><span class="p">[</span><span class="n">src</span><span class="p">]</span> <span class="o">=</span> <span class="n">opts</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">mountpoints</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">k</span> <span class="o">=</span> <span class="n">src</span>
+                <span class="k">if</span> <span class="s1">&#39;$&#39;</span> <span class="ow">in</span> <span class="n">chrmount</span><span class="p">:</span>
+                    <span class="n">chrmount</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">src</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="s1">&#39;optional&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">opts</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">chrmount</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mountpoints</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;create&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mounts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">options</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mountpoints</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">source</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">dest</span><span class="p">:</span>
+                <span class="n">dest</span> <span class="o">=</span> <span class="n">source</span>
+            <span class="n">dest</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">dest</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+            <span class="k">yield</span> <span class="n">k</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">options</span>
+
+    <span class="k">def</span> <span class="nf">_child_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getuid</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Enable a user namespace if we&#39;re not root. Note that this also</span>
+            <span class="c1"># requires a network namespace in order to mount sysfs and use</span>
+            <span class="c1"># network devices; however, we currently only provide a basic</span>
+            <span class="c1"># loopback interface if iproute2 is installed in the chroot so</span>
+            <span class="c1"># regular connections out of the namespaced environment won&#39;t work</span>
+            <span class="c1"># by default.</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;net&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+
+        <span class="n">simple_unshare</span><span class="p">(</span><span class="n">pid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hostname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mount</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chroot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_chdir</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># remove mount points that were dynamically created</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">chrmount</span><span class="p">,</span> <span class="n">opts</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mounts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;create&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Removing dynamically created mountpoint: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">chrmount</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">chrmount</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">chrmount</span><span class="p">)</span>
+                    <span class="n">chrmount</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">chrmount</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">removedirs</span><span class="p">(</span><span class="n">chrmount</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># ignore missing mountpoints, non-empty directories, and permission errors</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">errno</span><span class="o">.</span><span class="n">ENOTEMPTY</span><span class="p">,</span> <span class="n">errno</span><span class="o">.</span><span class="n">EACCES</span><span class="p">,</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOENT</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">ChrootMountError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;failed to remove chroot mount point </span><span class="si">{</span><span class="n">chrmount</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span>
+                        <span class="nb">getattr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s1">&#39;errno&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_mount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Do the bind mounts for this chroot object.</span>
+
+<span class="sd">        This _must_ be run after creating a new mount namespace.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">chrmount</span><span class="p">,</span> <span class="n">opts</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mounts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dictbool</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="s1">&#39;optional&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Skipping optional and nonexistent mountpoint: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">bind</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">chrmount</span><span class="p">,</span> <span class="n">chroot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pychroot master documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pychroot.base</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2018, pychroot contributors.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>
