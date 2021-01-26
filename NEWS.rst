@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+pychroot 0.10.4 (2021-01-25)
+----------------------------
+
+- Fix pychroot script exit status handling (#33).
+
+- Allow default mount disabling via passing mountpoints=None.
+
+- Force chroot path parameter to be positional only.
+
 pychroot 0.10.3 (2020-12-22)
 ----------------------------
 
